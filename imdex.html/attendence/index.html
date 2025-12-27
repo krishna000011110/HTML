@@ -1,0 +1,166 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+          content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="navbar-brand">
+            <h1> 
+                Student Attendance Portal
+            </h1>
+        </div>
+        <div class="navbar-links">
+            <p>
+                Academic Year: 
+                <span id="academicYear">2024</span>
+            </p>
+            <!-- Add other relevant information -->
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="formSection">
+            <h2>Mark Attendance</h2>
+            <button id="addStudentButton" 
+                onclick="showAddStudentForm()">
+                Add Student
+            </button>
+            <button id="addClassButton" 
+                onclick="showAddClassForm()">
+                Add Class
+            </button>
+
+            <label for="classSelector">Class:</label>
+            <select id="classSelector" required 
+                onchange="showStudentsList()">
+                <!-- Populate classes dynamically -->
+            </select>
+
+            <ul id="studentsList">
+                <!-- Populate students dynamically 
+                    based on the selected class -->
+            </ul>
+
+            <div id="summarySection">
+                <h3>Summary</h3>
+                <p>
+                    Total Students: 
+                    <span id="totalStudents">0</span>
+                </p>
+                <p>
+                    Total Present: 
+                    <span id="totalPresent">0</span>
+                </p>
+                <p>
+                    Total Absent: 
+                    <span id="totalAbsent">0</span>
+                </p>
+                <p>
+                    Total Leave: 
+                    <span id="totalLeave">0</span>
+                </p>
+            </div>
+
+            <button onclick="submitAttendance()">
+                Submit Attendance
+            </button>
+
+            <!-- Result Section -->
+            <div id="resultSection" style="display: none;">
+                <h3>Attendance Result</h3>
+                <p>
+                    Date: 
+                    <span id="attendanceDate"></span>
+                </p>
+                <p>
+                    Time: 
+                    <span id="attendanceTime"></span>
+                </p>
+                <p>
+                    Class: 
+                    <span id="attendanceClass"></span>
+                </p>
+                <p>
+                    Total Students: 
+                    <span id="attendanceTotalStudents"></span>
+                </p>
+                <p>
+                    Present: 
+                    <span id="attendancePresent"></span>
+                </p>
+                <p>
+                    Absent: 
+                    <span id="attendanceAbsent"></span>
+                </p>
+                <p>
+                    Leave: 
+                    <span id="attendanceLeave"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="addStudentPopup" class="popup">
+        <h2>Add Student</h2>
+        <!-- Add Student Form Content -->
+        <label for="newStudentName">
+            Student Name:
+        </label>
+        <input type="text" id="newStudentName" required>
+        <label for="newStudentRoll">
+            Roll Number:
+        </label>
+        <input type="text" id="newStudentRoll" required>
+        <!-- Add more fields as needed -->
+
+        <button onclick="addStudent()">
+            submit
+        </button>
+        <button onclick="closePopup()">
+            Cancel
+        </button>
+    </div>
+
+    <div id="addClassPopup" class="popup">
+        <h2>Add Class</h2>
+        <!-- Add Class Form Content -->
+        <label for="newClassName">
+            Class Name:
+        </label>
+        <input type="text" id="newClassName" required>
+        <!-- Add more fields as needed -->
+
+        <button onclick="addClass()">
+            Submit
+        </button>
+        <button onclick="closePopup()">
+            Cancel
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

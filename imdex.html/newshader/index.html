@@ -1,0 +1,529 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Cosmic Anomaly</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #000;
+        color: white;
+        font-family: 'Inter', sans-serif;
+    }
+    canvas {
+        width: 100%;
+        height: 100vh;
+        display: block;
+    }
+    #theme-selector {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        transform: translateX(0);
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        display: flex;
+        gap: 12px;
+        z-index: 10;
+    }
+    .theme-swatch {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .theme-swatch:hover {
+        transform: scale(1.15);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+    .theme-swatch.active {
+        border-color: #ffffff;
+        box-shadow: 0 0 20px #ffffff;
+        transform: scale(1.15);
+    }
+    .control-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+    }
+    .control-btn:hover {
+        transform: scale(1.15);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+    #fullscreen-btn {
+        background: linear-gradient(45deg, #ffffff, #cccccc);
+        color: #000;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    #explode-btn {
+         background: linear-gradient(45deg, #ff8c00, #ff0080);
+    }
+    #explode-btn.active {
+        box-shadow: 0 0 20px #ff6347;
+        transform: scale(1.15);
+        pointer-events: none; 
+        background: linear-gradient(45deg, #ff4500, #d30061);
+    }
+    #theme-selector::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        z-index: -1;
+        background: linear-gradient(45deg, #00ffff, #ff1493, #4169e1, #ff69b4, #00bfff, #00ffff);
+        background-size: 400% 400%;
+        animation: gradientBorder 15s ease infinite;
+        border-radius: 25px;
+        filter: blur(8px);
+        opacity: 0.7;
+    }
+    @keyframes gradientBorder {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<div id="theme-selector">
+    <div class="theme-swatch" data-theme="nebula" style="background: linear-gradient(45deg, #00ffff, #ff1493);"></div>
+    <div class="theme-swatch" data-theme="sunset" style="background: linear-gradient(45deg, #ff8c00, #ff0080);"></div>
+    <div class="theme-swatch" data-theme="forest" style="background: linear-gradient(45deg, #00ff7f, #1e90ff);"></div>
+    <div class="theme-swatch" data-theme="aurora" style="background: linear-gradient(45deg, #00ff7f, #9932cc);"></div>
+    <div id="explode-btn" class="control-btn" title="Trigger Explosion">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18px" height="18px">
+            <path d="M12 1.5a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-3 0v-3a1.5 1.5 0 0 1 1.5-1.5zM12 18a1.5 1.5 0 0 0-1.5 1.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0-1.5-1.5zM5.25 9.75a1.5 1.5 0 0 0-1.5-1.5h-3a1.5 1.5 0 0 0 0 3h3a1.5 1.5 0 0 0 1.5-1.5zM22.5 9.75a1.5 1.5 0 0 0-1.5-1.5h-3a1.5 1.5 0 0 0 0 3h3a1.5 1.5 0 0 0 1.5-1.5zM7.404 7.404a1.5 1.5 0 0 1 2.122-2.122l2.121 2.122a1.5 1.5 0 0 1-2.122 2.122L7.404 7.404zm9.192 9.192a1.5 1.5 0 0 1 2.122-2.122l2.121 2.122a1.5 1.5 0 0 1-2.122 2.122l-2.121-2.122zM7.404 16.596a1.5 1.5 0 0 1-2.122 2.122L3.161 16.596a1.5 1.5 0 1 1 2.122-2.122l2.121 2.122zm9.192-9.192a1.5 1.5 0 0 1-2.122 2.122l-2.121-2.122a1.5 1.5 0 0 1 2.122-2.122l2.121 2.122z"/>
+        </svg>
+    </div>
+    <div id="fullscreen-btn" class="control-btn">FS</div>
+</div>
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+    }
+}
+</script>
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+    import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js';
+
+    let scene, camera, renderer, composer, controls, mainGroup, clock;
+    let coreSphere, orbitRings, starfield, centralLight, lensflare;
+    let mouse = new THREE.Vector2(-10, -10); 
+    let currentHdrTexture = null;
+
+    let isExplosionActive = false;
+    let explosionStartTime = 0;
+    const explosionDuration = 2000; 
+
+    const themes = {
+        nebula: {
+            sphere: [new THREE.Color(0x00ffff), new THREE.Color(0xff1493), new THREE.Color(0x4169e1), new THREE.Color(0xff69b4), new THREE.Color(0x00bfff)],
+            rings: (i, count, j, pCount) => new THREE.Color().setHSL((i / count) * 0.6 + (j / pCount) * 0.2 + 0.5, 0.8, 0.6),
+            hdr: 'https://www.spacespheremaps.com/wp-content/uploads/HDR_blue_nebulae-1.hdr'
+        },
+        sunset: {
+            sphere: [new THREE.Color(0xff4500), new THREE.Color(0xff8c00), new THREE.Color(0xffd700), new THREE.Color(0xff0080), new THREE.Color(0xda70d6)],
+            rings: (i, count, j, pCount) => new THREE.Color().setHSL((i / count) * 0.1 + (j / pCount) * 0.1 + 0.0, 0.9, 0.7),
+            hdr: 'https://www.spacespheremaps.com/wp-content/uploads/HDR_silver_and_gold_nebulae.hdr'
+        },
+        forest: {
+            sphere: [new THREE.Color(0x228b22), new THREE.Color(0x00ff7f), new THREE.Color(0x3cb371), new THREE.Color(0x1e90ff), new THREE.Color(0x87cefa)],
+            rings: (i, count, j, pCount) => new THREE.Color().setHSL((i / count) * 0.2 + (j / pCount) * 0.1 + 0.25, 0.8, 0.55),
+            hdr: 'https://www.spacespheremaps.com/wp-content/uploads/HDR_subdued_multi_nebulae.hdr'
+        },
+        aurora: {
+            sphere: [new THREE.Color(0x00ff7f), new THREE.Color(0x40e0d0), new THREE.Color(0x483d8b), new THREE.Color(0x9932cc), new THREE.Color(0x00fa9a)],
+            rings: (i, count, j, pCount) => new THREE.Color().setHSL((i / count) * 0.3 + (j / pCount) * 0.1 + 0.45, 0.9, 0.65),
+            hdr: 'https://www.spacespheremaps.com/wp-content/uploads/HDR_multi_nebulae.hdr'
+        }
+    };
+    const pointMaterialShader = {
+        vertexShader: `
+            attribute float size;
+            attribute vec3 randomDir;
+            varying vec3 vColor;
+            varying float vDistance;
+            varying float vMouseEffect;
+            uniform float time;
+            uniform vec2 uMouse;
+            uniform float uExplode;
+            
+            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+            
+            float snoise(vec3 v) {
+                const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+                const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                vec3 i = floor(v + dot(v, C.yyy));
+                vec3 x0 = v - i + dot(i, C.xxx);
+                vec3 g = step(x0.yzx, x0.xyz);
+                vec3 l = 1.0 - g;
+                vec3 i1 = min(g.xyz, l.zxy);
+                vec3 i2 = max(g.xyz, l.zxy);
+                vec3 x1 = x0 - i1 + C.xxx;
+                vec3 x2 = x0 - i2 + C.yyy;
+                vec3 x3 = x0 - D.yyy;
+                i = mod289(i);
+                vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                float n_ = 0.142857142857;
+                vec3 ns = n_ * D.wyz - D.xzx;
+                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                vec4 x_ = floor(j * ns.z);
+                vec4 y_ = floor(j - 7.0 * x_);
+                vec4 x = x_ * ns.x + ns.yyyy;
+                vec4 y = y_ * ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+                vec4 b0 = vec4(x.xy, y.xy);
+                vec4 b1 = vec4(x.zw, y.zw);
+                vec4 s0 = floor(b0)*2.0 + 1.0;
+                vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+                vec3 p0 = vec3(a0.xy,h.x);
+                vec3 p1 = vec3(a0.zw,h.y);
+                vec3 p2 = vec3(a1.xy,h.z);
+                vec3 p3 = vec3(a1.zw,h.w);
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+            }
+            void main() {
+                vColor = color;
+                
+                float explodeAmount = uExplode * 35.0;
+                float turbulence = snoise(position * 0.4 + randomDir * 2.0 + time * 0.8) * 10.0 * uExplode;
+                vec3 explodedPos = position + randomDir * (explodeAmount + turbulence);
+                vec3 mixedPos = mix(position, explodedPos, uExplode);
+                
+                vec4 projectedVertex = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                vec2 screenPos = projectedVertex.xy / projectedVertex.w;
+                float mouseDist = distance(screenPos, uMouse);
+                float mouseEffect = 1.0 - smoothstep(0.0, 0.25, mouseDist);
+                vMouseEffect = mouseEffect;
+                
+                float noiseFrequency = 0.4;
+                float noiseAmplitude = (0.8 + mouseEffect * 3.5) * (1.0 - uExplode);
+                vec3 noiseInput = mixedPos * noiseFrequency + time * 0.5;
+                vec3 displacement = vec3(snoise(noiseInput), snoise(noiseInput + vec3(10.0)), snoise(noiseInput + vec3(20.0)));
+                vec3 finalPos = mixedPos + displacement * noiseAmplitude;
+                float pulse = sin(time + length(position)) * 0.1 + 1.0;
+                
+                vec4 mvPosition = modelViewMatrix * vec4(finalPos, 1.0);
+                vDistance = -mvPosition.z;
+                gl_PointSize = size * (400.0 / -mvPosition.z) * pulse * (1.0 + vMouseEffect * 0.5);
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        `,
+        fragmentShader: `
+            varying vec3 vColor;
+            varying float vMouseEffect;
+            uniform float time;
+            uniform float uExplode;
+            
+            float rand(vec2 co){ return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }
+            void main() {
+                vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+                float r = dot(cxy, cxy);
+                if (r > 1.0) discard;
+                
+                float glow = exp(-r * 3.5) + vMouseEffect * 0.5;
+                float twinkle = rand(gl_PointCoord + time) * 0.5 + 0.5;
+                
+                vec3 explosionColor = vec3(2.0, 3.0, 3.5); 
+                vec3 mixedColor = mix(vColor, explosionColor, uExplode * 0.8);
+                mixedColor *= (1.0 + uExplode * 6.0); 
+
+                vec3 finalColor = mixedColor * (1.1 + sin(time * 0.8) * 0.2 + vMouseEffect * 0.5) * glow * twinkle;
+                gl_FragColor = vec4(finalColor, smoothstep(0.0, 1.0, glow));
+            }
+        `
+    };
+    const starShader = {
+        vertexShader: `
+            attribute float size; varying vec3 vColor; uniform float time;
+            void main() {
+                vColor = color; vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                float twinkle = sin(time * 3.0 + position.x * 0.1 + position.y * 0.2) * 0.3 + 0.7;
+                gl_PointSize = size * twinkle * (1000.0 / -mvPosition.z);
+                gl_Position = projectionMatrix * mvPosition;
+            }`,
+        fragmentShader: `
+            varying vec3 vColor;
+            void main() {
+                vec2 cxy = 2.0 * gl_PointCoord - 1.0; float r = dot(cxy, cxy); if (r > 1.0) discard;
+                float glow = exp(-r * 4.0); gl_FragColor = vec4(vColor, glow * 0.8);
+            }`
+    };
+
+    function init() {
+        clock = new THREE.Clock();
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.008);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50000);
+        camera.position.set(0, 5, 14);
+        renderer = new THREE.WebGLRenderer({ antias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.04;
+        controls.rotateSpeed = 0.6;
+        controls.minDistance = 10;
+        controls.maxDistance = 50;
+        controls.target.set(0, 0, 0);
+        const renderScene = new RenderPass(scene, camera);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0;
+        bloomPass.strength = 1.2;
+        bloomPass.radius = 0.5;
+        composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+        coreSphere = createSpiralSphere(5, 40000);
+        orbitRings = createOrbitRings(7.5, 8, 0.6);
+        starfield = createStarfield(10000, 50000);
+        mainGroup = new THREE.Group();
+        mainGroup.add(coreSphere);
+        mainGroup.add(orbitRings);
+        scene.add(mainGroup);
+        scene.add(starfield);
+        centralLight = new THREE.PointLight(0xffffff, 2, 0);
+        centralLight.position.set(0, 0, 0);
+        scene.add(centralLight);
+        const textureLoader = new THREE.TextureLoader();
+        const textureFlare0 = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png');
+        const textureFlare3 = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare3.png');
+        lensflare = new Lensflare();
+        lensflare.addElement(new LensflareElement(textureFlare0, 500, 0, centralLight.color));
+        lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
+        lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
+        lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
+        lensflare.addElement(new LensflareElement(textureFlare3, 70, 1));
+        centralLight.add(lensflare);
+        changeTheme('nebula');
+        window.addEventListener('resize', onWindowResize);
+        window.addEventListener('mousemove', onMouseMove);
+        document.querySelectorAll('.theme-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => changeTheme(swatch.dataset.theme));
+        });
+        document.getElementById('explode-btn').addEventListener('click', triggerExplosion);
+        document.getElementById('fullscreen-btn').addEventListener('click', () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        });
+    }
+
+    function createSpiralSphere(radius, particleCount) {
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+        const randomDirs = new Float32Array(particleCount * 3).fill(0);
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            const phi = Math.acos(-1 + (2 * i) / particleCount);
+            const theta = Math.sqrt(particleCount * Math.PI) * phi;
+            positions[i3] = radius * Math.cos(theta) * Math.sin(phi);
+            positions[i3+1] = radius * Math.sin(theta) * Math.sin(phi);
+            positions[i3+2] = radius * Math.cos(phi);
+            sizes[i] = Math.random() * 0.2 + 0.1;
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.setAttribute('randomDir', new THREE.BufferAttribute(randomDirs, 3));
+        const material = createPointShaderMaterial();
+        material.uniforms.uExplode.value = 0; 
+        return new THREE.Points(geometry, material);
+    }
+
+    function createOrbitRings(radius, count, thickness) {
+        const group = new THREE.Group();
+        for (let i = 0; i < count; i++) {
+            const particleCount = 4000;
+            const ringGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            const randomDirs = new Float32Array(particleCount * 3);
+            const randomVec = new THREE.Vector3();
+            for (let j = 0; j < particleCount; j++) {
+                const j3 = j * 3;
+                const angle = (j / particleCount) * Math.PI * 2;
+                const radiusVariation = radius + (Math.random() - 0.5) * thickness;
+                positions[j3] = Math.cos(angle) * radiusVariation;
+                positions[j3+1] = (Math.random() - 0.5) * (thickness * 0.5);
+                positions[j3+2] = Math.sin(angle) * radiusVariation;
+                sizes[j] = Math.random() * 0.15 + 0.08;
+                randomVec.set(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
+                randomDirs[j3] = randomVec.x; randomDirs[j3+1] = randomVec.y; randomDirs[j3+2] = randomVec.z;
+            }
+            ringGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            ringGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            ringGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            ringGeometry.setAttribute('randomDir', new THREE.BufferAttribute(randomDirs, 3));
+            const ring = new THREE.Points(ringGeometry, createPointShaderMaterial());
+            ring.rotation.x = Math.random() * Math.PI;
+            ring.rotation.y = Math.random() * Math.PI;
+            group.add(ring);
+        }
+        return group;
+    }
+
+    function createStarfield(count, spread) {
+        const geometry = new THREE.BufferGeometry();
+        const positions = []; const colors = []; const sizes = [];
+        for (let i = 0; i < count; i++) {
+            positions.push((Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread);
+            const color = new THREE.Color();
+            color.setHSL(Math.random() * 0.1 - 0.05, 0.2, 0.5 + Math.random() * 0.5);
+            colors.push(color.r, color.g, color.b);
+            sizes.push(0.5 + Math.random() * 1.0);
+        }
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+        const material = new THREE.ShaderMaterial({
+            uniforms: { time: { value: 0 } }, vertexShader: starShader.vertexShader, fragmentShader: starShader.fragmentShader,
+            vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+        });
+        return new THREE.Points(geometry, material);
+    }
+
+    function createPointShaderMaterial() {
+         return new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 }, uMouse: { value: mouse }, uExplode: { value: 0.0 }
+            },
+            vertexShader: pointMaterialShader.vertexShader, fragmentShader: pointMaterialShader.fragmentShader,
+            vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+        });
+    }
+    
+    function changeTheme(themeName) {
+        const theme = themes[themeName];
+        if (!theme) return;
+        const sphereColorsAttr = coreSphere.geometry.attributes.color;
+        for (let i = 0; i < sphereColorsAttr.count; i++) {
+            const colorPos = (i / sphereColorsAttr.count) * (theme.sphere.length - 1);
+            const c1 = theme.sphere[Math.floor(colorPos)];
+            const c2 = theme.sphere[Math.min(Math.floor(colorPos) + 1, theme.sphere.length - 1)];
+            const newColor = new THREE.Color().copy(c1).lerp(c2, colorPos - Math.floor(colorPos));
+            sphereColorsAttr.setXYZ(i, newColor.r, newColor.g, newColor.b);
+        }
+        sphereColorsAttr.needsUpdate = true;
+        orbitRings.children.forEach((ring, i) => {
+            const ringColorsAttr = ring.geometry.attributes.color;
+            for (let j = 0; j < ringColorsAttr.count; j++) {
+                const newColor = theme.rings(i, orbitRings.children.length, j, ringColorsAttr.count);
+                ringColorsAttr.setXYZ(j, newColor.r, newColor.g, newColor.b);
+            }
+            ringColorsAttr.needsUpdate = true;
+        });
+        const rgbeLoader = new RGBELoader();
+        rgbeLoader.load(theme.hdr, (texture) => {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            if (currentHdrTexture) currentHdrTexture.dispose();
+            scene.background = texture; scene.environment = texture; currentHdrTexture = texture;
+        });
+        document.querySelectorAll('.theme-swatch').forEach(sw => {
+            sw.classList.toggle('active', sw.dataset.theme === themeName);
+        });
+    }
+
+    function easeInOutCubic(x) {
+        return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+
+    function triggerExplosion() {
+        if (isExplosionActive) return;
+        isExplosionActive = true;
+        explosionStartTime = clock.getElapsedTime();
+        document.getElementById('explode-btn').classList.add('active');
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+        const time = elapsedTime; 
+        
+        if (isExplosionActive) {
+            const explosionTime = (elapsedTime - explosionStartTime) * 1000;
+            const progress = Math.min(explosionTime / explosionDuration, 1.0);
+            const pulseProgress = Math.sin(progress * Math.PI);
+            const easedProgress = easeInOutCubic(pulseProgress);
+            orbitRings.children.forEach(ring => {
+                ring.material.uniforms.uExplode.value = easedProgress;
+            });
+            if (progress >= 1.0) {
+                isExplosionActive = false;
+                document.getElementById('explode-btn').classList.remove('active');
+            }
+        }
+
+        coreSphere.material.uniforms.time.value = time;
+        coreSphere.material.uniforms.uMouse.value.copy(mouse);
+        orbitRings.children.forEach(ring => { 
+            ring.material.uniforms.time.value = time; 
+            ring.material.uniforms.uMouse.value.copy(mouse);
+        });
+        starfield.material.uniforms.time.value = time;
+        
+        const breathe = 1 + Math.sin(time * 1.5) * 0.05;
+        coreSphere.scale.set(breathe, breathe, breathe);
+        orbitRings.children.forEach((ring, index) => {
+            const speed = 0.0005 * (index + 1);
+            ring.rotation.z += speed; ring.rotation.x += speed * 0.3; ring.rotation.y += speed * 0.2;
+            ring.scale.y = 1.0 + Math.sin(time * 3.0 + index * 0.5) * 0.2;
+        });
+        mainGroup.rotation.y += 0.0005;
+        controls.update();
+        composer.render();
+    }
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        composer.setSize(window.innerWidth, window.innerHeight);
+    }
+    function onMouseMove(event) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
+    
+    init();
+    animate();
+</script>

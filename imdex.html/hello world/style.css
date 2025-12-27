@@ -1,0 +1,121 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:900");
+
+body {
+  margin: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: "Montserrat", sans-serif;
+  background-color: #b1bcbf;
+}
+
+.container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+.background-image {
+  width: 50%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  background-image: url("https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg");
+  background-size: cover;
+}
+
+.split-screen {
+  width: 100%;
+  background-color: #2c2d2b;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  animation: 
+    reduceSize 1.5s 0.5s, 
+    moveRight 1.5s 3s;
+  animation-fill-mode: forwards;
+}
+
+.content {
+  color: white;
+  font-size: 10vw;
+  text-transform: uppercase;
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 4;
+  opacity: 0;
+  transform: translateY(100vh);
+  animation: 
+    fadeInUp 2s 0.5s, 
+    moveRight 1.5s 3s,
+    changeBackground 1.5s 3s;
+  animation-fill-mode: forwards;
+}
+
+.content p {
+  margin: 0;
+}
+
+.content .comma {
+  color: #2c2d2b;
+  opacity: 1;
+  animation: fadeOut 0.5s forwards 2.5s;
+}
+
+@keyframes reduceSize {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 50%;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes moveRight {
+  from {
+    left: 0%;
+  }
+  to {
+    left: 50%;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes changeBackground {
+  to {
+    background-image: url("https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg");
+    background-size: 200%;
+    background-position: center;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}

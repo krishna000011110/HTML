@@ -1,0 +1,192 @@
+body {
+  background: #000;
+  margin: 0;
+}
+
+#hitarea {
+  position: absolute;
+  left: 50%;
+  margin-left: -250px;
+  width: 500px;
+  height: 500px;
+}
+
+.hitbox {
+  width: 100px;
+  height: 100px;
+  float: left;
+}
+
+/* Eyes */
+.eye {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: #fff;
+  border-radius: 50%;
+  left: 25%;
+  top: 40%;
+  pointer-events: none;
+}
+
+.eye + .eye {
+  left: 55%;
+}
+
+.pupil {
+  position: relative;
+  width: 25px;
+  height: 25px;
+  background: #000;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  margin: -12px 0 0 -12px;
+  transition: all 0.5s ease;
+}
+
+.eyelid {
+  width: 150px;
+  height: 100px;
+  position: absolute;
+  left: 20%;
+  top: 25%;
+  pointer-events: none;
+  background: #000;
+  animation: blink 4.5s linear infinite alternate;
+  animation-delay: 1s;
+  transition: all 0.5s ease;
+}
+
+.eyelid + .eyelid {
+  left: 50%;
+}
+
+/* Blinking eyes */
+@keyframes blink {
+  0%, 95% {
+    top: 25%;
+  }
+  100% {
+    top: 40%;
+  }
+}
+
+/* Hover effects */
+
+/* Eyelid movement */
+.hitbox:hover ~ .eyelid {
+  transform: rotate(-10deg);
+}
+
+.hitbox:hover ~ .eyelid:nth-of-type(2n+1) {
+  transform: rotate(10deg);
+}
+
+#c-3:hover ~ .eyelid {
+  transform: rotate(15deg);
+}
+
+#c-3:hover ~ .eyelid:nth-of-type(2n+1) {
+  transform: rotate(-15deg);
+}
+
+/* Pupils movement */
+#a-1:hover ~ .eye > .pupil {
+  transform: rotate(60deg) translate(-30px);
+}
+#a-2:hover ~ .eye > .pupil {
+  transform: rotate(80deg) translate(-30px);
+}
+#a-3:hover ~ .eye > .pupil {
+  transform: rotate(90deg) translate(-30px);
+}
+#a-4:hover ~ .eye > .pupil {
+  transform: rotate(100deg) translate(-30px);
+}
+#a-5:hover ~ .eye > .pupil {
+  transform: rotate(120deg) translate(-30px);
+}
+
+#b-1:hover ~ .eye > .pupil {
+  transform: rotate(50deg) translate(-25px);
+}
+#b-2:hover ~ .eye > .pupil {
+  transform: rotate(70deg) translate(-25px);
+}
+#b-3:hover ~ .eye > .pupil {
+  transform: rotate(100deg) translate(-25px);
+}
+#b-3:hover ~ .eye:nth-of-type(2n+1) > .pupil {
+  transform: rotate(80deg) translate(-25px);
+}
+#b-4:hover ~ .eye > .pupil {
+  transform: rotate(110deg) translate(-25px);
+}
+#b-5:hover ~ .eye > .pupil {
+  transform: rotate(130deg) translate(-25px);
+}
+
+#c-1:hover ~ .eye > .pupil {
+  transform: rotate(0deg) translate(-25px);
+}
+#c-2:hover ~ .eye > .pupil {
+  transform: rotate(0deg) translate(-10px);
+}
+#c-3:hover ~ .eye > .pupil {
+  background: red;
+  transform: rotate(180deg) translate(-25px);
+}
+#c-3:hover ~ .eye:nth-of-type(2n+1) > .pupil {
+  transform: rotate(0deg) translate(-25px);
+}
+#c-4:hover ~ .eye > .pupil {
+  transform: rotate(180deg) translate(-10px);
+}
+#c-5:hover ~ .eye > .pupil {
+  transform: rotate(180deg) translate(-25px);
+}
+
+#d-1:hover ~ .eye > .pupil {
+  transform: rotate(-40deg) translate(-25px);
+}
+#d-2:hover ~ .eye > .pupil {
+  transform: rotate(-60deg) translate(-25px);
+}
+#d-3:hover ~ .eye > .pupil {
+  transform: rotate(-120deg) translate(-25px);
+}
+#d-3:hover ~ .eye:nth-of-type(2n+1) > .pupil {
+  transform: rotate(-60deg) translate(-25px);
+}
+#d-4:hover ~ .eye > .pupil {
+  transform: rotate(-130deg) translate(-25px);
+}
+#d-4:hover ~ .eye:nth-of-type(2n+1) > .pupil {
+  transform: rotate(-100deg) translate(-25px);
+}
+#d-5:hover ~ .eye > .pupil {
+  transform: rotate(-140deg) translate(-25px);
+}
+
+#e-1:hover ~ .eye > .pupil {
+  transform: rotate(-40deg) translate(-30px);
+}
+#e-2:hover ~ .eye > .pupil {
+  transform: rotate(-60deg) translate(-30px);
+}
+#e-3:hover ~ .eye > .pupil {
+  transform: rotate(-120deg) translate(-30px);
+}
+#e-3:hover ~ .eye:nth-of-type(2n+1) > .pupil {
+  transform: rotate(-60deg) translate(-30px);
+}
+#e-4:hover ~ .eye > .pupil {
+  transform: rotate(-130deg) translate(-30px);
+}
+#e-4:hover ~ .eye:nth-of-type(2n+1) > .pupil {
+  transform: rotate(-100deg) translate(-30px);
+}
+#e-5:hover ~ .eye > .pupil {
+  transform: rotate(-140deg) translate(-30px);
+}
