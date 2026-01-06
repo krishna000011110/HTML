@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PROCODER97</title>
+
+    <style>
+       body, html, #app {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  touch-action: none;
+}
+
+#app {
+  height: 100%;
+  font-family: "Montserrat", serif;
+}
+
+#canvas {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+
+.buttons {
+  position: fixed;
+  width: 100%;
+  bottom: 15px;
+  z-index: 2;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+button, a {
+  color: black;
+  font-family: "Montserrat", serif;
+  font-size: 12px;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  border: 1px solid grey;
+  padding: 4px 8px;
+}
+    </style>
+</head>
+<body>
+<div id="app">
+  <canvas id="canvas"></canvas>
+  <a target="_blank" href="https://www.framer.com/@kevin-levron/">Framer Component</a>
+  <div class="buttons">
+    <button type="button" id="colors-btn">
+      Random colors
+    </button>
+    <a href="https://www.framer.com/@kevin-levron/" target="_blank">
+      Framer Component
+    </a>
+  </div>
+</div>
+
+
+    <script type="module">
+  import AttractionCursor from "https://cdn.jsdelivr.net/npm/threejs-components@0.0.26/build/cursors/attraction1.min.js"
+
+  const app = AttractionCursor(document.getElementById('canvas'), {
+    particles: {
+      attractionIntensity: 0.75,
+      size: 1.5,
+    },
+  })
+
+  const button1 = document.getElementById('colors-btn')
+
+  button1.addEventListener('click', () => {
+    app.particles.light1.color.set(Math.random() * 0xffffff)
+    app.particles.light2.color.set(Math.random() * 0xffffff)
+  })
+</script>
+
+
+</body>
+</html>
