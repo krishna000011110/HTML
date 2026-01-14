@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 490">
+  <defs>
+    <mask id="planet">
+      <circle cx="250" cy="259" r="221" fill="#fff"/>
+    </mask>
+    <mask id="depthmap-mask">
+      <image width="500" height="490" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-depthmap-mask.jpg"/>
+    </mask>
+    <mask id="deep-depthmap-mask">
+      <image width="500" height="490" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-deep-depthmap-mask.jpg"/>
+    </mask>
+    <mask id="highlight-mask">
+      <image width="500" height="490" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-highlight-mask.jpg"/>
+    </mask>
+    <mask id="shadows-mask">
+      <image width="500" height="490" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-shadows-mask.jpg"/>
+    </mask>
+    <mask id="atmosphere-mask">
+      <image width="500" height="490" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-atmosphere.jpg"/>
+    </mask>
+    
+    <filter id="deepDepthMap">
+      <feConvolveMatrix order="3 3" preserveAlpha="true" kernelMatrix="-2 0 0 0 0 0 0 0 2"/>
+      <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+      <feConvolveMatrix order="5 5"
+        preserveAlpha="true" 
+        kernelMatrix="-1 0 0 0 0 0 -2 0 0 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0"/>
+    </filter>
+    
+    <filter id="depthMap">
+      <feConvolveMatrix order="3 3" preserveAlpha="true" kernelMatrix="0 -1 0 -1 5 -1 0 -1 0"/>
+      <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+    </filter>
+    
+    <filter id="light">
+      <feConvolveMatrix order="3 3" preserveAlpha="true" kernelMatrix="0 -1 0 -1 5 -1 0 -1 0"/>
+      <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0" />
+    </filter>
+  </defs>
+  
+  <g mask="url(#planet)" class="planet">
+    <image width="1490" height="444" class="texture" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-texture--loop.jpg" x="0" y="37"/>
+    
+    <image width="1490" height="444" class="weather" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-weather--loop.jpg" x="0" y="37"/>
+    
+    <g mask="url(#shadows-mask)" class="shadows">
+      <image width="1490" height="444" filter="url(#light)" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-texture--loop.jpg" x="0" y="37"/>
+    </g>
+   
+    <g mask="url(#highlight-mask)" class="highlight">
+      <image width="1490" height="444" filter="url(#light)" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-texture--loop.jpg" x="0" y="37"/>
+    </g>
+    
+    <g mask="url(#depthmap-mask)" class="depthmap">
+      <image width="1490" height="444" filter="url(#depthMap)" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-texture--loop.jpg" x="0" y="37"/>
+    </g>
+    
+    <g mask="url(#deep-depthmap-mask)" class="deep-depthmap">
+      <image width="1490" height="444"  filter="url(#deepDepthMap)" xlink:href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/jupiter-texture--loop.jpg" x="0" y="37"/>
+    </g>
+  </g>
+  
+  <linearGradient id="atmosphere" gradientUnits="userSpaceOnUse" x1="198.04" y1="489.44" x2="301.73" y2="1.63"><stop offset="0" stop-color="#140c02"/>
+    <stop offset=".2" stop-color="#0a0804"/>
+    <stop offset=".88" stop-color="#ffdbb4"/>
+    <stop offset="1" stop-color="#fff"/>
+  </linearGradient>
+  
+  <path fill="url(#atmosphere)" mask="url(#atmosphere-mask)" id="jupiter" d="M0 0h500v490H0z"/>
+</svg>
+</body>
+</html>

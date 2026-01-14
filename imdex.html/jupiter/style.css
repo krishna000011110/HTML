@@ -1,0 +1,64 @@
+html {
+  height: 100%;
+  display: flex;
+}
+
+body {
+  margin: auto;
+  background: linear-gradient(
+      25deg,
+      #100803,
+      rgba(16, 8, 3, 0)
+    ),
+    url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/106403/Skies0258_3_download600%5B1%5D.jpg");
+}
+
+/* SVG */
+svg {
+  height: 90vmin;
+}
+
+/* Blend modes */
+.depthmap,
+.deep-depthmap {
+  mix-blend-mode: soft-light;
+}
+
+.shadows {
+  mix-blend-mode: multiply;
+}
+
+.highlight {
+  mix-blend-mode: screen;
+}
+
+.weather {
+  opacity: 0.2;
+  mix-blend-mode: overlay;
+}
+
+/* Planet */
+.planet {
+  transform: rotate(-5deg);
+  transform-origin: 50% 50%;
+}
+
+/* Nested image animation */
+.planet image {
+  animation: rotation 200s linear infinite;
+}
+
+/* Nested weather animation */
+.planet .weather {
+  animation: rotation 100s linear infinite;
+}
+
+/* Keyframes */
+@keyframes rotation {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-1000px, 0);
+  }
+}
