@@ -1,0 +1,38 @@
+ body,
+    html {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0px;
+        height: 100%;
+        width: 100%;
+        background: black;
+    }
+
+    .outer {
+        display: flex;
+        align-items: flex-top;
+        justify-content: flex-end;
+        height: 300px;
+        width: 320px;
+        border-radius: 50%;
+        background-image: linear-gradient(45deg, #ffe4c8 23%, orange 15% 20%, #ff2a00 90%);
+        box-shadow: 0 0 0px 80px black;
+      transition:1s;
+    }
+
+    .outer div {
+        height: 75%;
+        width: 85%;
+        border-radius: 50%;
+        background: black;
+        margin: 20px;
+    }
+.outer{
+  height:300px;
+  width:320px;
+    cursor:pointer;
+}
+.outer:hover{
+   filter: blur(25px) brightness(2.8);
+}
