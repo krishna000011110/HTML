@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Congratulations</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin-bottom: 30px;
+    }
+
+    .box {
+      padding: 18px 50px;
+      border-radius: 40px;
+      background: #ffd369;
+      color: #000;
+      font-size: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .box:hover {
+      transform: scale(1.1);
+      background: #ffb703;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Congratulations you got</h1>
+
+  <div class="box" onclick="openReward()">
+    🎁 Tap to Reveal
+  </div>
+
+  <script>
+    function openReward() {
+      window.location.href = "reward.html";
+    }
+  </script>
+
+</body>
+</html>
