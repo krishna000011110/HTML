@@ -1,0 +1,875 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --glass-bg: rgba(255,255,255,0.08);
+    --glass-border: rgba(255,255,255,0.18);
+    --glass-shadow: rgba(0,0,0,0.25);
+    --accent: rgba(255,255,255,0.9);
+    --text-primary: rgba(255,255,255,0.92);
+    --text-secondary: rgba(255,255,255,0.52);
+    --pill-active: rgba(255,255,255,0.18);
+    --blur: 28px;
+    --radius: 20px;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  body {
+    overflow: hidden;
+    background: #050608;
+    font-family: var(--font);
+    color: var(--text-primary);
+    user-select: none;
+  }
+
+  #container {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 30% 20%, #0c0f2a 0%, #050608 55%),
+                radial-gradient(ellipse at 80% 85%, #0a0c1f 0%, transparent 60%);
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+    box-shadow:
+      0 8px 32px var(--glass-shadow),
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      inset 0 -1px 0 rgba(0,0,0,0.08);
+    border-radius: var(--radius);
+  }
+
+  #hud {
+    position: fixed;
+    top: 24px; left: 24px;
+    padding: 16px 20px;
+    z-index: 100;
+    min-width: 200px;
+  }
+
+  .hud-title {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .hud-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 12.5px;
+  }
+  .hud-row:last-child { border-bottom: none; }
+
+  .hud-key { color: var(--text-secondary); font-weight: 400; }
+  .hud-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-primary);
+    letter-spacing: 0.03em;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #5effa0;
+    box-shadow: 0 0 8px #5effa0;
+    animation: pulse-dot 2.4s ease-in-out infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.45; transform: scale(1.4); }
+  }
+
+  #stats {
+    position: fixed;
+    top: 24px; right: 24px;
+    padding: 14px 18px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stat-item { display: flex; flex-direction: column; gap: 4px; }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .stat-bar {
+    width: 100px;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stat-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.8));
+    transition: width 0.4s ease;
+  }
+  .stat-fill.cpu  { width: 72%; }
+  .stat-fill.gpu  { width: 88%; }
+  .stat-fill.mem  { width: 58%; }
+
+  #control-panel {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0 20px;
+  }
+
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+  }
+
+  .toggle-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.25s ease;
+    border: 1px solid transparent;
+  }
+  .toggle-pill.active {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.18);
+    color: var(--text-primary);
+  }
+  .toggle-pill:hover:not(.active) {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.75);
+  }
+
+  .pill-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+  }
+  .toggle-pill.active .pill-dot {
+    background: #a5f3c0;
+    box-shadow: 0 0 8px rgba(165,243,192,0.7);
+  }
+
+  .panel-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.12);
+  }
+
+  #execute-btn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font);
+    color: var(--text-primary);
+    border: none;
+    outline: none;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.14);
+    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+  }
+  #execute-btn:hover {
+    background: rgba(255,255,255,0.18);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  #execute-btn:active { transform: translateY(0); }
+
+  .btn-icon {
+    width: 14px; height: 14px;
+    opacity: 0.8;
+  }
+
+  #controls-toggle {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font);
+    color: var(--text-primary);
+    border: none;
+    outline: none;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+  }
+
+  @media (max-width: 768px) {
+    #controls-toggle { display: flex; }
+    .toggle-group, .panel-divider { display: none; }
+    #control-panel.expanded .toggle-group { display: flex; flex-direction: column; }
+    #control-panel.expanded .panel-divider { display: block; }
+    #control-panel { flex-direction: column; bottom: 20px; }
+    #stats { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    #hud { font-size: 11px; top: 16px; left: 16px; }
+  }
+</style>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<div id="container"></div>
+
+<div id="hud" class="glass">
+  <div class="hud-title"><span class="status-dot"></span>Lumina System</div>
+  <div class="hud-row">
+    <span class="hud-key">FPS</span>
+    <span class="hud-val" id="fps-display">60</span>
+  </div>
+  <div class="hud-row">
+    <span class="hud-key">Particles</span>
+    <span class="hud-val" id="node-display">24,000</span>
+  </div>
+  <div class="hud-row">
+    <span class="hud-key">Mode</span>
+    <span class="hud-val" id="mode-display">Auroral Flow</span>
+  </div>
+  <div class="hud-row">
+    <span class="hud-key">Trails</span>
+    <span class="hud-val" id="trail-display">On</span>
+  </div>
+</div>
+
+<div id="stats" class="glass">
+  <div class="stat-item">
+    <div class="stat-label">CPU</div>
+    <div class="stat-bar"><div class="stat-fill cpu"></div></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">GPU</div>
+    <div class="stat-bar"><div class="stat-fill gpu"></div></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Memory</div>
+    <div class="stat-bar"><div class="stat-fill mem"></div></div>
+  </div>
+</div>
+
+<div id="control-panel">
+  <button id="controls-toggle">
+    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+    </svg>
+    Controls
+  </button>
+
+  <div class="toggle-group glass">
+    <div class="toggle-pill active" id="flow-pill">
+      <div class="pill-dot"></div>Flow
+    </div>
+    <div class="toggle-pill active" id="trails-pill">
+      <div class="pill-dot"></div>Trails
+    </div>
+  </div>
+
+  <div class="panel-divider"></div>
+
+  <button id="execute-btn">
+    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="5,3 19,12 5,21" fill="currentColor" stroke="none" opacity="0.8"/>
+    </svg>
+    Next Scene
+  </button>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+let scene, camera, renderer, composer, controls, bloomPass;
+let dataNodes, trailSystem, bgStars;
+let bloomTarget = 0.55, bloomCurrent = 0.55;
+let time = 0;
+let currentViz = 0;
+let isTransforming = false;
+let transformProgress = 0;
+let frameCount = 0, lastFpsTime = performance.now(), fps = 60;
+let autoRotate = true, dataFlow = true, showTrails = true;
+
+const NODE_COUNT  = 24000;
+const TRAIL_COUNT = 6000;
+const TRANSFORM_SPEED = 0.018;
+
+const VIZ_NAMES = ['Auroral Flow', 'Crystal Lattice', 'Plasma Dipole'];
+const BLOOM_STRENGTHS = [0.28, 0.55, 0.38];
+
+const PALETTES = [
+  [
+    new THREE.Color(0x5bd4f0), new THREE.Color(0x8be8ff),
+    new THREE.Color(0x4fb8d0), new THREE.Color(0x7ec8e3),
+    new THREE.Color(0x2da8c4), new THREE.Color(0xa8f5e8),
+    new THREE.Color(0x6dd4c8), new THREE.Color(0xcef5ff)
+  ],
+  [
+    new THREE.Color(0xe8d5ff), new THREE.Color(0xd0b4f5),
+    new THREE.Color(0xffd5e8), new THREE.Color(0xf5c4d8),
+    new THREE.Color(0xffffff), new THREE.Color(0xc8b4e8),
+    new THREE.Color(0xffe8f5), new THREE.Color(0xb8a0d8)
+  ],
+  [
+    new THREE.Color(0xff2a00), new THREE.Color(0xff6a00),
+    new THREE.Color(0xffaa22), new THREE.Color(0xffdd66),
+    new THREE.Color(0xffffff), new THREE.Color(0xff4400),
+    new THREE.Color(0xff8800), new THREE.Color(0xffcc44)
+  ]
+];
+
+function _hash(n) {
+  return (Math.abs(Math.sin(n * 127.1 + 311.7) * 43758.5453)) % 1;
+}
+
+function genAuroralFlow(i, count) {
+  const t = i / count;
+  const bands = 12;
+  const band = Math.floor(t * bands);
+  const bt = (t * bands) % 1;
+
+  const spread = 130;
+  const x = (band / bands - 0.5) * spread;
+  const z = Math.sin(band * 0.9) * 24;
+  const y = (bt - 0.5) * 110;
+
+  const wave1 = Math.sin(bt * Math.PI * 3 + band * 0.7) * (7 + band * 0.8);
+  const wave2 = Math.cos(bt * Math.PI * 2 + band * 1.1) * 4;
+
+  return new THREE.Vector3(x + wave2, y, z + wave1);
+}
+
+function genCrystalLattice(i, count) {
+  const shells = 5;
+  const shell = Math.floor((i / count) * shells);
+  const shellT = (i / count * shells) % 1;
+
+  const phi = Math.acos(1 - 2 * shellT);
+  const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+  
+  const r = 10 + shell * 14;
+  const ripple = Math.sin(theta * 4) * Math.cos(phi * 4) * 0.8;
+
+  return new THREE.Vector3(
+    (r + ripple) * Math.sin(phi) * Math.cos(theta),
+    (r + ripple) * Math.sin(phi) * Math.sin(theta),
+    (r + ripple) * Math.cos(phi)
+  );
+}
+
+function genPlasmaDipole(i, count) {
+  const FIELD_FRAC = 0.45, DISK_FRAC = 0.38, JET_FRAC = 0.17;
+  const fieldEnd = Math.floor(count * FIELD_FRAC);
+  const diskEnd  = fieldEnd + Math.floor(count * DISK_FRAC);
+
+  if (i < fieldEnd) {
+    const LINES = 28;
+    const lineIdx = Math.floor(i / (fieldEnd / LINES));
+    const lt      = (i % Math.ceil(fieldEnd / LINES)) / Math.ceil(fieldEnd / LINES);
+
+    const R0  = 14 + lineIdx * 3.8;
+    const phi = (lineIdx / LINES) * Math.PI * 2 + lineIdx * 0.22;
+    const lambda = (lt - 0.5) * Math.PI * 0.94;
+    
+    const cosL = Math.cos(lambda);
+    const r = R0 * cosL * cosL;
+
+    const scatter = (_hash(i * 3.1) - 0.5) * 1.2;
+    const sAngle  = _hash(i * 7.7) * Math.PI * 2;
+
+    return new THREE.Vector3(
+      r * cosL * Math.cos(phi) + Math.cos(sAngle) * scatter * 0.5,
+      r * Math.sin(lambda),
+      r * cosL * Math.sin(phi) + Math.sin(sAngle) * scatter * 0.5
+    );
+  } else if (i < diskEnd) {
+    const di = i - fieldEnd;
+    const dt = di / (diskEnd - fieldEnd);
+
+    const innerR = 10;
+    const outerR = 68;
+    const r = innerR * Math.pow(outerR / innerR, dt);
+    const angle = dt * Math.PI * 14 + _hash(i * 2.3) * 0.6;
+
+    const halfH = 3.5 * (1 - dt * 0.72) + _hash(i * 5.9) * 1.2;
+    const y = (_hash(i * 8.1) * 2 - 1) * halfH;
+
+    return new THREE.Vector3(r * Math.cos(angle), y, r * Math.sin(angle));
+  } else {
+    const ji = i - diskEnd;
+    const half = Math.floor((count - diskEnd) / 2);
+    const sign = ji < half ? 1 : -1;
+    const jt = (ji % half) / half;
+
+    const height = sign * jt * 78;
+    const spread = jt * jt * 7.5;
+    const twist = jt * Math.PI * 4;
+    const angle = _hash(i * 4.3) * Math.PI * 2 + twist;
+    const r = _hash(i * 9.1) * spread;
+
+    const knotPull = Math.sin(jt * Math.PI * 6) * 0.4;
+
+    return new THREE.Vector3(
+      r * Math.cos(angle) * (1 + knotPull),
+      height,
+      r * Math.sin(angle) * (1 + knotPull)
+    );
+  }
+}
+
+const GENERATORS = [genAuroralFlow, genCrystalLattice, genPlasmaDipole];
+
+function assignProps(i, colors, sizes, vizIdx) {
+  const pal = PALETTES[vizIdx];
+  let color, brightness;
+
+  if (vizIdx === 0) {
+    const band = Math.floor((i / NODE_COUNT) * 12);
+    color = pal[band % pal.length];
+    brightness = 0.6 + Math.random() * 0.7;
+    sizes[i] = 0.5 + Math.random() * 2.2;
+  } else if (vizIdx === 1) {
+    const shell = Math.floor((i / NODE_COUNT) * 5);
+    color = pal[shell % pal.length];
+    brightness = 0.7 + Math.random() * 0.6;
+    sizes[i] = 0.5 + Math.random() * 1.8;
+  } else {
+    const FIELD_END = Math.floor(NODE_COUNT * 0.45);
+    const DISK_END  = FIELD_END + Math.floor(NODE_COUNT * 0.38);
+    if (i < FIELD_END) {
+      color = pal[i % 2 === 0 ? 0 : 5];
+      brightness = 0.45 + Math.random() * 0.45;
+      sizes[i] = 0.4 + Math.random() * 1.4;
+    } else if (i < DISK_END) {
+      const dt = (i - FIELD_END) / (DISK_END - FIELD_END);
+      color = pal[2 + Math.floor(dt * 3)];
+      brightness = (0.5 + dt * 0.65) * (0.8 + Math.random() * 0.4);
+      sizes[i] = 0.35 + Math.random() * 1.5;
+    } else {
+      color = pal[4];
+      brightness = 0.85 + Math.random() * 0.5;
+      sizes[i] = 0.6 + Math.random() * 2.0;
+    }
+  }
+
+  colors[i*3]   = color.r * brightness;
+  colors[i*3+1] = color.g * brightness;
+  colors[i*3+2] = color.b * brightness;
+}
+
+function makeParticleTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64,64,0,64,64,64);
+  g.addColorStop(0,    'rgba(255,255,255,1.0)');
+  g.addColorStop(0.15, 'rgba(255,255,255,0.85)');
+  g.addColorStop(0.4,  'rgba(200,230,255,0.35)');
+  g.addColorStop(0.75, 'rgba(180,210,255,0.08)');
+  g.addColorStop(1,    'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,128,128);
+  const t = new THREE.CanvasTexture(c); t.needsUpdate = true; return t;
+}
+
+function makeTrailTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 32;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(16,16,0,16,16,16);
+  g.addColorStop(0,  'rgba(255,255,255,0.7)');
+  g.addColorStop(0.5,'rgba(255,255,255,0.2)');
+  g.addColorStop(1,  'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,32,32);
+  const t = new THREE.CanvasTexture(c); t.needsUpdate = true; return t;
+}
+
+function buildDataNodes() {
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(NODE_COUNT * 3);
+  const col = new Float32Array(NODE_COUNT * 3);
+  const siz = new Float32Array(NODE_COUNT);
+
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const p = GENERATORS[currentViz](i, NODE_COUNT);
+    pos[i*3] = p.x; pos[i*3+1] = p.y; pos[i*3+2] = p.z;
+    assignProps(i, col, siz, currentViz);
+  }
+
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  geo.setAttribute('size',     new THREE.BufferAttribute(siz, 1));
+  geo.userData.currentColors = new Float32Array(col);
+
+  const mat = new THREE.PointsMaterial({
+    size: 3.0, map: makeParticleTexture(),
+    vertexColors: true, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  dataNodes = new THREE.Points(geo, mat);
+  scene.add(dataNodes);
+}
+
+function buildTrails() {
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(TRAIL_COUNT * 3);
+  const col = new Float32Array(TRAIL_COUNT * 3);
+  const siz = new Float32Array(TRAIL_COUNT);
+
+  const pal = PALETTES[currentViz];
+  for (let i = 0; i < TRAIL_COUNT; i++) {
+    pos[i*3]   = (Math.random()-0.5)*120;
+    pos[i*3+1] = (Math.random()-0.5)*100;
+    pos[i*3+2] = (Math.random()-0.5)*120;
+    const c = pal[Math.floor(Math.random()*pal.length)];
+    col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
+    siz[i] = Math.random()*1.5 + 0.3;
+  }
+
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  geo.setAttribute('size',     new THREE.BufferAttribute(siz, 1));
+
+  const mat = new THREE.PointsMaterial({
+    size: 1.5, map: makeTrailTexture(),
+    vertexColors: true, transparent: true, opacity: 0.45,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  trailSystem = new THREE.Points(geo, mat);
+  scene.add(trailSystem);
+}
+
+function buildBgStars() {
+  const geo = new THREE.BufferGeometry();
+  const N = 3000;
+  const pos = new Float32Array(N*3);
+  const col = new Float32Array(N*3);
+  for (let i = 0; i < N; i++) {
+    const r = 250 + Math.random()*350;
+    const phi = Math.random()*Math.PI*2;
+    const th = Math.random()*Math.PI;
+    pos[i*3]   = r*Math.sin(th)*Math.cos(phi);
+    pos[i*3+1] = r*Math.sin(th)*Math.sin(phi);
+    pos[i*3+2] = r*Math.cos(th);
+    const v = 0.08 + Math.random()*0.18;
+    col[i*3] = v*0.7; col[i*3+1] = v*0.85; col[i*3+2] = v;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({ size:0.8, vertexColors:true, transparent:true, opacity:0.6, blending:THREE.AdditiveBlending, depthWrite:false });
+  bgStars = new THREE.Points(geo, mat);
+  scene.add(bgStars);
+}
+
+function init() {
+  scene  = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x050608, 0.0008);
+
+  camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 2000);
+  camera.position.set(0, 20, 130);
+
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:'high-performance' });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  document.getElementById('container').appendChild(renderer.domElement);
+
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  controls.rotateSpeed = 0.5;
+  controls.zoomSpeed = 0.8;
+  controls.minDistance = 30;
+  controls.maxDistance = 350;
+  controls.enablePan = false;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.25;
+
+  composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.55, 0.45, 0.8);
+  composer.addPass(bloomPass);
+  composer.addPass(new OutputPass());
+
+  buildDataNodes();
+  buildTrails();
+  buildBgStars();
+  setupEvents();
+  animate();
+}
+
+function animateFlow() {
+  if (!dataNodes || isTransforming || !dataFlow) return;
+  const pos = dataNodes.geometry.attributes.position.array;
+
+  if (currentViz === 0) {
+    for (let i = 0; i < NODE_COUNT; i++) {
+      pos[i*3+1] += 0.28;
+      if (pos[i*3+1] > 55) pos[i*3+1] -= 110;
+      pos[i*3]   += Math.sin(time*1.5 + i*0.04) * 0.03;
+      pos[i*3+2] += Math.cos(time*1.2 + i*0.04) * 0.03;
+    }
+  } else if (currentViz === 1) {
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const shell = Math.floor((i/NODE_COUNT)*5);
+      const sp = 0.004 + shell*0.002;
+      const x = pos[i*3], z = pos[i*3+2];
+      pos[i*3]   = x*Math.cos(sp) - z*Math.sin(sp);
+      pos[i*3+2] = x*Math.sin(sp) + z*Math.cos(sp);
+    }
+  } else {
+    const FIELD_END = Math.floor(NODE_COUNT * 0.45);
+    const DISK_END  = FIELD_END + Math.floor(NODE_COUNT * 0.38);
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const x = pos[i*3], z = pos[i*3+2];
+      
+      if (i < FIELD_END) {
+        const sp = 0.0012;
+        pos[i*3]   = x*Math.cos(sp) - z*Math.sin(sp);
+        pos[i*3+2] = x*Math.sin(sp) + z*Math.cos(sp);
+      } else if (i < DISK_END) {
+        const r = Math.sqrt(x*x + z*z) || 1;
+        const sp = 0.012 / Math.sqrt(r / 10);
+        pos[i*3]   = x*Math.cos(sp) - z*Math.sin(sp);
+        pos[i*3+2] = x*Math.sin(sp) + z*Math.cos(sp);
+      } else {
+        const sign = pos[i*3+1] >= 0 ? 1 : -1;
+        pos[i*3+1] += 0.22 * sign;
+        const limit = 80;
+        
+        if (Math.abs(pos[i*3+1]) > limit) {
+          pos[i*3+1] = sign * 1.5;
+          pos[i*3]   = (_hash(i + time*10) - 0.5) * 2.5;
+          pos[i*3+2] = (_hash(i * 2.1 + time*10) - 0.5) * 2.5;
+        }
+        
+        const r2 = Math.sqrt(x*x + z*z) || 0.001;
+        const jt = Math.abs(pos[i*3+1]) / limit;
+        pos[i*3]   += (x/r2) * jt * 0.06;
+        pos[i*3+2] += (z/r2) * jt * 0.06;
+      }
+    }
+  }
+  dataNodes.geometry.attributes.position.needsUpdate = true;
+}
+
+function animateTrails() {
+  if (!trailSystem || !showTrails) return;
+  const pos = trailSystem.geometry.attributes.position.array;
+  for (let i = 0; i < TRAIL_COUNT; i++) {
+    const ix = i*3, iy=ix+1, iz=ix+2;
+    
+    if (currentViz === 0) {
+      pos[iy] += 0.35;
+      if (pos[iy] > 55) pos[iy] = -55;
+      pos[ix] += Math.sin(time*2 + i*0.08)*0.08;
+      pos[iz] += Math.cos(time*1.7 + i*0.08)*0.08;
+    } else if (currentViz === 1) {
+      const sp = 0.007 + (i%4)*0.003;
+      const x=pos[ix], z=pos[iz];
+      pos[ix] = x*Math.cos(sp)-z*Math.sin(sp);
+      pos[iz] = x*Math.sin(sp)+z*Math.cos(sp);
+    } else {
+      const x=pos[ix], z=pos[iz];
+      const r = Math.sqrt(x*x+z*z) || 1;
+      const sp = 0.010 / Math.sqrt(r/10);
+      pos[ix] = x*Math.cos(sp)-z*Math.sin(sp);
+      pos[iz] = x*Math.sin(sp)+z*Math.cos(sp);
+      pos[iy] += (i%2===0 ? 0.18 : -0.18);
+      if (Math.abs(pos[iy]) > 65) pos[iy] *= -0.05;
+    }
+  }
+  trailSystem.geometry.attributes.position.needsUpdate = true;
+}
+
+function startTransform(nextViz) {
+  isTransforming = true;
+  transformProgress = 0;
+
+  const pos = dataNodes.geometry.attributes.position.array;
+  const col = dataNodes.geometry.attributes.color.array;
+  const siz = dataNodes.geometry.attributes.size.array;
+
+  const fromPos = new Float32Array(pos);
+  const fromCol = new Float32Array(dataNodes.geometry.userData.currentColors);
+  const fromSiz = new Float32Array(siz);
+
+  const toPos = new Float32Array(NODE_COUNT*3);
+  const toCol = new Float32Array(NODE_COUNT*3);
+  const toSiz = new Float32Array(NODE_COUNT);
+
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const p = GENERATORS[nextViz](i, NODE_COUNT);
+    toPos[i*3]=p.x; toPos[i*3+1]=p.y; toPos[i*3+2]=p.z;
+    assignProps(i, toCol, toSiz, nextViz);
+  }
+
+  dataNodes.userData = { fromPos, toPos, fromCol, toCol, fromSiz, toSiz, targetViz: nextViz };
+
+  const pal = PALETTES[nextViz];
+  const tc = trailSystem.geometry.attributes.color.array;
+  for (let i = 0; i < TRAIL_COUNT; i++) {
+    const c = pal[Math.floor(Math.random()*pal.length)];
+    tc[i*3]=c.r; tc[i*3+1]=c.g; tc[i*3+2]=c.b;
+  }
+  trailSystem.geometry.attributes.color.needsUpdate = true;
+}
+
+function updateFps() {
+  frameCount++;
+  const now = performance.now();
+  if (now - lastFpsTime >= 1000) {
+    fps = Math.round(frameCount*1000/(now-lastFpsTime));
+    document.getElementById('fps-display').textContent = fps;
+    frameCount = 0; lastFpsTime = now;
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  time += 0.01;
+  updateFps();
+  controls.update();
+
+  bloomTarget = BLOOM_STRENGTHS[currentViz];
+  bloomCurrent += (bloomTarget - bloomCurrent) * 0.04;
+  if (bloomPass) bloomPass.strength = bloomCurrent;
+
+  if (bgStars) { bgStars.rotation.y += 0.0002; bgStars.rotation.x += 0.00008; }
+
+  if (isTransforming) {
+    transformProgress += TRANSFORM_SPEED;
+    const ud = dataNodes.userData;
+    const pos = dataNodes.geometry.attributes.position.array;
+    const col = dataNodes.geometry.attributes.color.array;
+    const siz = dataNodes.geometry.attributes.size.array;
+
+    if (transformProgress >= 1) {
+      pos.set(ud.toPos); col.set(ud.toCol); siz.set(ud.toSiz);
+      dataNodes.geometry.userData.currentColors = new Float32Array(ud.toCol);
+      currentViz = ud.targetViz;
+      isTransforming = false; transformProgress = 0;
+    } else {
+      const t = transformProgress;
+      const e = t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+      for (let i=0; i<pos.length; i++) {
+        pos[i] = ud.fromPos[i]*(1-e) + ud.toPos[i]*e;
+        col[i] = ud.fromCol[i]*(1-e) + ud.toCol[i]*e;
+      }
+      for (let i=0; i<siz.length; i++) siz[i]=ud.fromSiz[i]*(1-e)+ud.toSiz[i]*e;
+    }
+    dataNodes.geometry.attributes.position.needsUpdate = true;
+    dataNodes.geometry.attributes.color.needsUpdate = true;
+    dataNodes.geometry.attributes.size.needsUpdate = true;
+  } else {
+    animateFlow();
+  }
+
+  animateTrails();
+  composer.render();
+}
+
+function setupEvents() {
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+    composer.setSize(innerWidth, innerHeight);
+  });
+
+  function makePill(id, getState, setState, labelEl) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', () => {
+      setState(!getState());
+      el.classList.toggle('active', getState());
+      if (labelEl) labelEl();
+    });
+  }
+
+  makePill('flow-pill',
+    ()=>dataFlow,
+    v=>{ dataFlow=v; }
+  );
+  makePill('trails-pill',
+    ()=>showTrails,
+    v=>{
+      showTrails=v;
+      if(trailSystem) trailSystem.visible=v;
+      document.getElementById('trail-display').textContent = v ? 'On' : 'Off';
+    }
+  );
+
+  document.getElementById('execute-btn').addEventListener('click', () => {
+    if (isTransforming) return;
+    const next = (currentViz+1) % GENERATORS.length;
+    startTransform(next);
+    const name = VIZ_NAMES[next];
+    document.getElementById('mode-display').textContent = name;
+  });
+
+  const toggle = document.getElementById('controls-toggle');
+  const panel  = document.getElementById('control-panel');
+  toggle.addEventListener('click', () => panel.classList.toggle('expanded'));
+}
+
+window.addEventListener('load', init);
+</script>
