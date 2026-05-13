@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>madramchodram</title>
+</head>
+<body>
+<style>
+  body, html { 
+    margin: 0; 
+    padding: 0; 
+    overflow: hidden; 
+    background-color: #010102;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  #swarm-container { 
+    width: 100%; 
+    height: 100vh; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+  #ui {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-size: 11px;
+    padding: 14px 36px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
+                inset 0 0 12px rgba(255, 255, 255, 0.05);
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  #ui:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5),
+                inset 0 0 16px rgba(255, 255, 255, 0.1);
+    transform: translateX(-50%) translateY(-2px);
+    color: rgba(255, 255, 255, 1);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  #ui:active {
+    transform: translateX(-50%) translateY(1px);
+  }
+</style>
+
+<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js"
+    }
+  }
+</script>
+
+<div id="swarm-container"></div>
+<div id="ui">CLICK TO EVOLVE</div>
+
+<script type="module">
+  import * as THREE from 'three';
+
+  const container = document.getElementById('swarm-container');
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  
+  function updateCameraZ() {
+      const aspect = window.innerWidth / window.innerHeight;
+      const maxShapeExtent = 38.0;
+      const fovRad = (camera.fov * Math.PI) / 180;
+      let requiredZ = maxShapeExtent / Math.tan(fovRad / 2);
+      
+      if (aspect < 1.0) {
+          requiredZ /= aspect;
+      }
+      camera.position.z = requiredZ;
+  }
+  updateCameraZ();
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  container.appendChild(renderer.domElement);
+
+  const particleCount = 100000;
+  const geometry = new THREE.BufferGeometry();
+  
+  const positions = new Float32Array(particleCount * 3);
+  const ids = new Float32Array(particleCount);
+  const randoms = new Float32Array(particleCount * 3);
+
+  for (let i = 0; i < particleCount; i++) {
+    ids[i] = i / particleCount; 
+    randoms[i * 3] = Math.random();
+    randoms[i * 3 + 1] = Math.random();
+    randoms[i * 3 + 2] = Math.random();
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('aId', new THREE.BufferAttribute(ids, 1));
+  geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uMorphProgress: { value: 0.0 },
+      uCurrentShape: { value: 0 },
+      uTargetShape: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) }
+    },
+    vertexShader: `
+      uniform float uTime;
+      uniform float uMorphProgress;
+      uniform int uCurrentShape;
+      uniform int uTargetShape;
+      uniform vec2 uMouse;
+
+      attribute float aId;
+      attribute vec3 aRandom;
+
+      varying vec3 vColor;
+      varying float vAlpha;
+
+      #define PI 3.14159265359
+
+      vec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {
+          return a + b*cos( 6.28318*(c*t+d) );
+      }
+
+      vec3 getAstrolabe(float id, vec3 rnd) {
+          vec3 pos;
+          
+          if (rnd.x > 0.3) {
+              float t = id * PI * 2.0;
+              float u = t * 13.0;
+              float v = t * 8.0;
+              
+              float r = 12.0 + 3.0 * cos(v);
+              pos = vec3(r * cos(u), r * sin(u), 4.0 * sin(v));
+              
+              float noiseAngle = rnd.y * PI * 2.0;
+              float noiseRadius = rnd.z * 1.5;
+              pos += vec3(cos(noiseAngle), sin(noiseAngle), cos(noiseAngle)) * noiseRadius;
+          } else {
+              float ringIdx = floor(rnd.y * 3.0);
+              float angle = id * PI * 2.0 * 1000.0 + uTime * 0.2 * (ringIdx > 1.0 ? -1.0 : 1.0);
+              float r = 24.0 + ringIdx * 4.0 + (rnd.z * 0.5);
+              
+              pos = vec3(r * cos(angle), (rnd.x - 0.15) * 2.0, r * sin(angle));
+              
+              float tilt = 0.5 + ringIdx * 0.8;
+              float rotX = cos(tilt); float rotY = sin(tilt);
+              pos.yz = mat2(rotX, -rotY, rotY, rotX) * pos.yz;
+              pos.xy = mat2(rotX, -rotY, rotY, rotX) * pos.xy;
+          }
+          return pos * 0.85;
+      }
+
+      vec3 getDNA(float id, vec3 rnd) {
+          float h = (id - 0.5) * 75.0;
+          float angle = h * 0.5 + uTime * 0.5;
+          float radius = 16.0;
+          
+          float strand = step(0.5, rnd.x);
+          angle += strand * PI;
+          
+          vec3 pos = vec3(cos(angle) * radius, h, sin(angle) * radius);
+          
+          float rungZone = fract(h * 0.5);
+          if (rungZone < 0.15 && rnd.y > 0.4) {
+              float span = (rnd.z * 2.0 - 1.0); 
+              pos = vec3(span * cos(angle - strand*PI) * radius, h, span * sin(angle - strand*PI) * radius);
+          } else {
+              pos += (rnd - 0.5) * 1.0;
+          }
+          
+          return pos;
+      }
+
+      vec3 getHeart(float id, vec3 rnd) {
+          float u = rnd.x * PI * 2.0;
+          float v = acos(2.0 * rnd.y - 1.0);
+          
+          float x = 16.0 * pow(sin(u), 3.0);
+          float y = 13.0 * cos(u) - 5.0 * cos(2.0 * u) - 2.0 * cos(3.0 * u) - cos(4.0 * u) + 3.0;
+          float z = 5.0 * cos(v);
+          
+          vec3 pos = vec3(x, y, z);
+          
+          float layer = floor(rnd.z * 3.0); 
+          float scale = 1.0 - (layer * 0.35);
+          
+          float beat = 1.0 + pow(sin(uTime * 3.0 - layer * 0.8), 8.0) * 0.12;
+          
+          return pos * scale * beat * 1.5;
+      }
+
+      vec3 getShapePosition(int shape, float id, vec3 rnd) {
+          if (shape == 0) return getAstrolabe(id, rnd);
+          if (shape == 1) return getDNA(id, rnd);
+          if (shape == 2) return getHeart(id, rnd);
+          return vec3(0.0);
+      }
+
+      vec3 getShapeColor(int shape, float id, vec3 rnd) {
+          if (shape == 0) return palette(id + uTime*0.05, vec3(0.5, 0.5, 0.6), vec3(0.3, 0.3, 0.4), vec3(1.0, 1.0, 1.0), vec3(0.0, 0.33, 0.67));
+          if (shape == 1) {
+              float h = (id - 0.5) * 60.0; 
+              float rungZone = fract(h * 0.5);
+              if(rungZone < 0.15 && rnd.y > 0.4) return vec3(0.0, 0.9, 0.4);
+              return palette(id * 0.1, vec3(0.2, 0.6, 0.8), vec3(0.1, 0.3, 0.4), vec3(1.0, 1.0, 1.0), vec3(0.0, 0.2, 0.4));
+          }
+          if (shape == 2) {
+              float layer = floor(rnd.z * 3.0); 
+              if (layer == 2.0) return vec3(1.0, 0.6, 0.8);
+              return palette(id, vec3(0.9, 0.1, 0.2), vec3(0.3, 0.0, 0.1), vec3(1.0, 0.5, 0.5), vec3(0.0, 0.0, 0.0));
+          }
+          return vec3(1.0);
+      }
+
+      float cubicInOut(float t) {
+          return t < 0.5 ? 4.0 * t * t * t : 1.0 - pow(-2.0 * t + 2.0, 3.0) / 2.0;
+      }
+
+      void main() {
+          vec3 p1 = getShapePosition(uCurrentShape, aId, aRandom);
+          vec3 p2 = getShapePosition(uTargetShape, aId, aRandom);
+          
+          vec3 c1 = getShapeColor(uCurrentShape, aId, aRandom);
+          vec3 c2 = getShapeColor(uTargetShape, aId, aRandom);
+
+          float easedMorph = cubicInOut(uMorphProgress);
+          
+          vec3 finalPos = mix(p1, p2, easedMorph);
+          
+          float breatheMask = sin(uMorphProgress * PI);
+          finalPos += normalize(finalPos) * breatheMask * 8.0;
+
+          float autoRot1 = (uCurrentShape == 2) ? 0.0 : uTime * 0.1;
+          float autoRot2 = (uTargetShape == 2) ? 0.0 : uTime * 0.1;
+          float rotY = mix(autoRot1, autoRot2, easedMorph) + uMouse.x * 0.5;
+          float rotX = uMouse.y * 0.5;
+          
+          mat3 rotMatY = mat3(
+              cos(rotY), 0.0, sin(rotY),
+              0.0, 1.0, 0.0,
+              -sin(rotY), 0.0, cos(rotY)
+          );
+          
+          mat3 rotMatX = mat3(
+              1.0, 0.0, 0.0,
+              0.0, cos(rotX), -sin(rotX),
+              0.0, sin(rotX), cos(rotX)
+          );
+          
+          finalPos = rotMatY * rotMatX * finalPos;
+
+          vColor = mix(c1, c2, easedMorph);
+          
+          vAlpha = 0.3 + 0.7 * sin(uTime * 5.0 + aId * PI * 20.0);
+
+          vec4 mvPosition = modelViewMatrix * vec4(finalPos, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+          
+          gl_PointSize = (2.0 + aRandom.x * 2.5) * (40.0 / -mvPosition.z);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      varying float vAlpha;
+
+      void main() {
+          vec2 uv = gl_PointCoord.xy - vec2(0.5);
+          float dist = length(uv);
+          
+          if (dist > 0.5) discard;
+          
+          float alpha = smoothstep(0.5, 0.1, dist);
+
+          gl_FragColor = vec4(vColor, alpha * vAlpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false, 
+    blending: THREE.AdditiveBlending 
+  });
+
+  const particles = new THREE.Points(geometry, material);
+  scene.add(particles);
+
+  let morphProgress = 0;
+  let currentShape = 0;
+  let targetShape = 0;
+  let isTransitioning = false;
+  const TOTAL_SHAPES = 3;
+
+  const mouse = new THREE.Vector2(0, 0);
+  const targetMouse = new THREE.Vector2(0, 0);
+
+  window.addEventListener('mousemove', (e) => {
+    targetMouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    targetMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  window.addEventListener('touchmove', (e) => {
+    targetMouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+    targetMouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+  }, { passive: true });
+
+  function triggerMorph() {
+    if (!isTransitioning) {
+      targetShape = (targetShape + 1) % TOTAL_SHAPES;
+      isTransitioning = true;
+      morphProgress = 0;
+    }
+  }
+
+  window.addEventListener('click', triggerMorph);
+  window.addEventListener('touchstart', triggerMorph, { passive: true });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    updateCameraZ();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  const clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    const elapsedTime = clock.getElapsedTime();
+    
+    mouse.x += (targetMouse.x - mouse.x) * delta * 2.0;
+    mouse.y += (targetMouse.y - mouse.y) * delta * 2.0;
+    
+    if (isTransitioning) {
+      morphProgress += delta * 0.8;
+      
+      if (morphProgress >= 1) {
+        morphProgress = 0;
+        currentShape = targetShape;
+        isTransitioning = false;
+      }
+    }
+    
+    material.uniforms.uTime.value = elapsedTime;
+    material.uniforms.uMorphProgress.value = morphProgress;
+    material.uniforms.uCurrentShape.value = currentShape;
+    material.uniforms.uTargetShape.value = targetShape;
+    material.uniforms.uMouse.value.copy(mouse);
+    
+    renderer.render(scene, camera);
+  }
+
+  animate();
+</script>
+    
+</body>
+</html>
