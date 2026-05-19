@@ -1,0 +1,1468 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;400;500;600&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+:root {
+    --ui-glow: #ffaa00;
+}
+body {
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(255, 255, 255, 0.95);
+}
+#bg-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background: radial-gradient(ellipse at center, #1a0a00 0%, #000000 100%);
+    transition: background 1s ease;
+}
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+@keyframes electric-pulse {
+    0% {
+        box-shadow: 0 0 5px var(--ui-glow), inset 0 0 2px var(--ui-glow);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 15px var(--ui-glow), 0 0 5px var(--ui-glow), inset 0 0 8px var(--ui-glow);
+        border-color: #fff;
+    }
+    100% {
+        box-shadow: 0 0 5px var(--ui-glow), inset 0 0 2px var(--ui-glow);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+}
+.ui-toggle {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 101;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    animation: electric-pulse 2s infinite ease-in-out;
+}
+.ui-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+.ui-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: rgba(255, 255, 255, 0.9);
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 2px var(--ui-glow));
+}
+.ui-toggle.active svg {
+    transform: rotate(45deg);
+}
+.controls {
+    position: fixed;
+    bottom: 90px;
+    left: 30px;
+    padding: 25px;
+    z-index: 100;
+    width: 300px;
+    background: rgba(20, 10, 5, 0.6);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: bottom left;
+}
+.controls.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+@media (max-width: 600px) {
+    .ui-toggle { bottom: 20px; left: 20px; }
+    .controls {
+        left: 20px;
+        bottom: 80px;
+        width: calc(100% - 40px);
+        max-width: 320px;
+    }
+}
+.controls h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(255, 255, 255,0.3);
+}
+.theme-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.theme-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+}
+.theme-btn.active {
+    transform: scale(1.2);
+    border-color: #fff;
+    box-shadow: 0 0 15px var(--glow-color);
+    animation: electric-pulse 2s infinite ease-in-out;
+}
+.t-inferno { background: linear-gradient(135deg, #ff4d00, #ffaa00); --glow-color: #ff6600; }
+.t-storm { background: linear-gradient(135deg, #0066ff, #00ccff); --glow-color: #00ccff; }
+.t-venom { background: linear-gradient(135deg, #00ff00, #ccff00); --glow-color: #ccff00; }
+.slider-container {
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+}
+.slider-container label {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: space-between;
+}
+.slider-container label span {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    opacity: 0.8;
+    min-width: 40px;
+    text-align: right;
+}
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    outline: none;
+}
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    transition: transform 0.2s;
+}
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px var(--ui-glow);
+}
+.info {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    z-index: 90;
+    text-align: right;
+    pointer-events: none;
+}
+.click-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, var(--flash-color, rgba(255, 140, 60, 0.3)) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 180ms ease-out;
+}
+</style>
+
+<div id="bg-gradient"></div>
+<div id="container"></div>
+<div class="click-flash"></div>
+<div class="ui-toggle" id="uiToggle">
+    <svg viewBox="0 0 24 24">
+        <path d="M12 4V20M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+</div>
+<div class="controls" id="controlsPanel">
+    <h3>System Energy</h3>
+    <div class="theme-row">
+        <div class="theme-btn t-inferno active" data-theme="inferno" title="Inferno"></div>
+        <div class="theme-btn t-storm" data-theme="storm" title="Storm"></div>
+        <div class="theme-btn t-venom" data-theme="venom" title="Venom"></div>
+    </div>
+    <div class="slider-container">
+        <label>Field Intensity <span id="electric-value">70%</span></label>
+        <input type="range" class="slider" id="electricIntensity" min="0" max="100" value="70">
+    </div>
+    <div class="slider-container">
+        <label>Arc Frequency <span id="arc-value">65%</span></label>
+        <input type="range" class="slider" id="arcFrequency" min="0" max="100" value="65">
+    </div>
+    <div class="slider-container">
+        <label>Glow Strength <span id="glow-value">60%</span></label>
+        <input type="range" class="slider" id="glowStrength" min="0" max="100" value="60">
+    </div>
+</div>
+
+<div class="info">Touch to Discharge</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.163.0/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+    }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+const Themes = {
+    inferno: {
+        uColor1: new THREE.Vector3(0.15, 0.02, 0.0),
+        uColor2: new THREE.Vector3(0.4, 0.1, 0.02),
+        uColor3: new THREE.Vector3(0.9, 0.3, 0.05),
+        uColor4: new THREE.Vector3(1.0, 0.5, 0.1),
+        uColor5: new THREE.Vector3(1.0, 0.65, 0.2),
+        uColor6: new THREE.Vector3(1.0, 0.85, 0.3),
+        uColor7: new THREE.Vector3(1.0, 0.95, 0.85),
+        uColor8: new THREE.Vector3(0.8, 0.15, 0.05),
+        bg: "radial-gradient(ellipse at center, #1a0a00 0%, #000000 100%)",
+        flash: "rgba(255, 140, 60, 0.3)",
+        boltColor: 0xffaa66,
+        chainColor: 0xff8844,
+        uiColor: '#ffaa00'
+    },
+    storm: {
+        uColor1: new THREE.Vector3(0.05, 0.0, 0.15),
+        uColor2: new THREE.Vector3(0.1, 0.0, 0.4),
+        uColor3: new THREE.Vector3(0.2, 0.1, 0.9),
+        uColor4: new THREE.Vector3(0.3, 0.4, 1.0),
+        uColor5: new THREE.Vector3(0.4, 0.7, 1.0),
+        uColor6: new THREE.Vector3(0.7, 0.9, 1.0),
+        uColor7: new THREE.Vector3(0.9, 0.95, 1.0),
+        uColor8: new THREE.Vector3(0.6, 0.0, 0.8),
+        bg: "radial-gradient(ellipse at center, #05001a 0%, #000000 100%)",
+        flash: "rgba(100, 140, 255, 0.3)",
+        boltColor: 0x88ccff,
+        chainColor: 0x4488ff,
+        uiColor: '#00ccff'
+    },
+    venom: {
+        uColor1: new THREE.Vector3(0.05, 0.1, 0.0),
+        uColor2: new THREE.Vector3(0.1, 0.3, 0.0),
+        uColor3: new THREE.Vector3(0.2, 0.6, 0.0),
+        uColor4: new THREE.Vector3(0.4, 0.8, 0.1),
+        uColor5: new THREE.Vector3(0.6, 1.0, 0.2),
+        uColor6: new THREE.Vector3(0.8, 1.0, 0.5),
+        uColor7: new THREE.Vector3(0.95, 1.0, 0.9),
+        uColor8: new THREE.Vector3(0.8, 0.0, 0.8),
+        bg: "radial-gradient(ellipse at center, #0a1a00 0%, #000000 100%)",
+        flash: "rgba(140, 255, 60, 0.3)",
+        boltColor: 0xaaff66,
+        chainColor: 0x88ff44,
+        uiColor: '#ccff00'
+    }
+};
+
+let currentTheme = Themes.inferno;
+
+let scene, camera, renderer, composer, bloomPass, chromaticAberrationPass;
+let electricShape, lightningBolts, chainLightning, electricParticles;
+const mouse = new THREE.Vector2();
+const targetRotation = new THREE.Vector2();
+const currentRotation = new THREE.Vector2();
+let mouseSpeed = new THREE.Vector2();
+let lastMousePosition = new THREE.Vector2();
+let mouseInfluence = 0;
+const clock = new THREE.Clock();
+
+const settings = {
+    electricIntensity: 0.7,
+    arcFrequency: 0.65,
+    glowStrength: 0.6,
+    enableLightning: true,
+    enableChainLightning: true,
+    bloom: {
+        strength: 0.6,
+        radius: 0.3,
+        threshold: 0.3
+    },
+    chromaticAberrationAmount: 0.003
+};
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 6;
+
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance'
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    document.getElementById('container').appendChild(renderer.domElement);
+
+    createSceneElements();
+    setupPostProcessing();
+    setupUI();
+    addEventListeners();
+    updateSliderValues();
+    
+    document.documentElement.style.setProperty('--ui-glow', currentTheme.uiColor);
+    
+    animate();
+}
+
+function setupUI() {
+    const toggle = document.getElementById('uiToggle');
+    const controls = document.getElementById('controlsPanel');
+    const themeBtns = document.querySelectorAll('.theme-btn');
+    const bg = document.getElementById('bg-gradient');
+    const flash = document.querySelector('.click-flash');
+
+    toggle.addEventListener('click', () => {
+        controls.classList.toggle('visible');
+        toggle.classList.toggle('active');
+    });
+
+    themeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            themeBtns.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const themeKey = e.target.dataset.theme;
+            currentTheme = Themes[themeKey];
+            
+            bg.style.background = currentTheme.bg;
+            flash.style.setProperty('--flash-color', currentTheme.flash);
+            document.documentElement.style.setProperty('--ui-glow', currentTheme.uiColor);
+
+            if(electricShape) {
+                const u = electricShape.material.uniforms;
+                u.uColor1.value.copy(currentTheme.uColor1);
+                u.uColor2.value.copy(currentTheme.uColor2);
+                u.uColor3.value.copy(currentTheme.uColor3);
+                u.uColor4.value.copy(currentTheme.uColor4);
+                u.uColor5.value.copy(currentTheme.uColor5);
+                u.uColor6.value.copy(currentTheme.uColor6);
+                u.uColor7.value.copy(currentTheme.uColor7);
+                u.uColor8.value.copy(currentTheme.uColor8);
+            }
+            if(electricParticles) {
+                const u = electricParticles.material.uniforms;
+                u.uColor3.value.copy(currentTheme.uColor3);
+                u.uColor4.value.copy(currentTheme.uColor4);
+                u.uColor5.value.copy(currentTheme.uColor5);
+                u.uColor6.value.copy(currentTheme.uColor6);
+            }
+        });
+    });
+}
+
+function createSceneElements() {
+    const lorenzGeometry = createElectricWireframeGeometry();
+    electricShape = new THREE.LineSegments(lorenzGeometry, createElectricMaterial());
+    scene.add(electricShape);
+
+    lightningBolts = createLightningBolts();
+    scene.add(lightningBolts);
+
+    chainLightning = createChainLightning();
+    scene.add(chainLightning);
+
+    electricParticles = createElectricParticles();
+    scene.add(electricParticles);
+}
+
+function setupPostProcessing() {
+    composer = new EffectComposer(renderer);
+
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        settings.bloom.strength,
+        settings.bloom.radius,
+        settings.bloom.threshold
+    );
+    if (!bloomPass.userData) bloomPass.userData = {};
+    composer.addPass(bloomPass);
+
+    chromaticAberrationPass = new ShaderPass(createChromaticAberrationShader());
+    if (!chromaticAberrationPass.userData) chromaticAberrationPass.userData = {};
+    composer.addPass(chromaticAberrationPass);
+}
+
+function addEventListeners() {
+    document.getElementById('electricIntensity').addEventListener('input', handleSliderChange);
+    document.getElementById('arcFrequency').addEventListener('input', handleSliderChange);
+    document.getElementById('glowStrength').addEventListener('input', handleSliderChange);
+
+    window.addEventListener('mousemove', onMouseMove, false);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('mousedown', onInteractionStart, false);
+    window.addEventListener('touchstart', onInteractionStart, { passive: false });
+    window.addEventListener('resize', onWindowResize, false);
+}
+
+const noiseHelperFunctions = `
+            float hash(float n) { return fract(sin(n) * 43758.5453); }
+            float hash3D(vec3 p) {
+                p = fract(p * 0.3183099 + 0.1);
+                p *= 17.0;
+                return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+            }
+
+            float noise(vec3 x) {
+                vec3 p = floor(x);
+                vec3 f = fract(x);
+                f = f * f * (3.0 - 2.0 * f);
+
+                float n = p.x + p.y * 57.0 + p.z * 113.0;
+                return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
+                           mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
+                           mix(mix(hash(n + 113.0), hash(n + 114.0), f.x),
+                           mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);
+            }
+
+            float fbm(vec3 p) {
+                float value = 0.0;
+                float amplitude = 0.5;
+                float frequency = 1.0;
+                for (int i = 0; i < 5; i++) {
+                    value += amplitude * noise(p * frequency);
+                    frequency *= 2.0;
+                    amplitude *= 0.5;
+                }
+                return value;
+            }
+        `;
+
+const electricVertexShader = `
+            uniform float time;
+            uniform vec2 mouse;
+            uniform float mouseInfluence;
+            uniform float electricIntensity;
+            uniform float arcFrequency;
+
+            varying vec3 vPosition;
+            varying vec3 vNormal;
+            varying float vIntensity;
+            varying float vDistFromMouse;
+            varying vec2 vUv;
+
+            ${noiseHelperFunctions}
+
+            void main() {
+                vec3 pos = position;
+                vNormal = normal;
+                vUv = uv;
+
+                float wave = sin(position.x * 2.5 + time * 1.8) * cos(position.y * 2.2 + time * 1.4) * sin(position.z * 2.0 + time * 1.1) * 0.35;
+                wave += sin(position.x * 4.0 - time * 2.1) * cos(position.y * 3.5 - time * 1.6) * sin(position.z * 4.5 - time * 1.0) * 0.25;
+                wave += sin(position.x * 9.0 + time * 3.5) * cos(position.y * 8.0 + time * 2.8) * sin(position.z * 10.0 + time * 4.0) * 0.1;
+
+                float arcNoise = fbm(vec3(pos * 6.0 + time * 3.5));
+                float arcEffect = 0.0;
+                float arcThreshold = 0.6 + (1.0 - arcFrequency) * 0.2;
+                if (arcNoise > arcThreshold) {
+                    float arcStrength = smoothstep(arcThreshold, arcThreshold + 0.1, arcNoise);
+                    arcEffect = arcStrength * arcFrequency * 2.0;
+                }
+
+                if (hash(floor(time * (10.0 + arcFrequency * 15.0)) + length(position) * 15.0) > 0.97) {
+                     arcEffect += hash(position.x * 10.0 + position.y * 5.0) * arcFrequency * 1.8;
+                }
+
+                vec3 viewPos = (modelViewMatrix * vec4(pos, 1.0)).xyz;
+                vec2 screenPos = viewPos.xy / viewPos.z;
+                vDistFromMouse = length(screenPos - mouse * vec2(1.0, -1.0));
+
+                float rippleSpeed = 18.0;
+                float rippleDecay = smoothstep(3.0, 0.0, vDistFromMouse);
+                float ripple1 = sin(vDistFromMouse * 4.0 - time * rippleSpeed) * 0.7;
+                float ripple2 = sin(vDistFromMouse * 8.0 - time * rippleSpeed * 1.3) * 0.4;
+                float combinedRipple = (ripple1 + ripple2) * mouseInfluence * rippleDecay;
+
+                vec3 pullDir = normalize(vec3(mouse.x, -mouse.y, 0.5) - normalize(viewPos));
+                float pullStrength = mouseInfluence * rippleDecay * 0.8;
+                if (mouseInfluence > 0.6 && vDistFromMouse < 0.5) {
+                    pullStrength += sin(time * 40.0) * 0.1 * mouseInfluence;
+                }
+
+                float generalDistortion = fbm(pos * 3.5 - time * 1.5) * 0.1;
+                pos += vNormal * (wave * 0.18 * electricIntensity);
+                pos += vNormal * (arcEffect * 0.45 * electricIntensity);
+                pos += vNormal * (generalDistortion * electricIntensity);
+                pos += vNormal * (combinedRipple * 0.8);
+                pos += pullDir * pullStrength;
+
+                vIntensity = wave * 0.5 + 0.5;
+                vIntensity += arcEffect * 3.0;
+                vIntensity += abs(combinedRipple) * 1.5;
+                vIntensity += abs(generalDistortion) * 1.0;
+                vIntensity = clamp(vIntensity, 0.0, 3.0);
+
+                vPosition = pos;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+            }
+        `;
+
+const electricFragmentShader = `
+            uniform float time;
+            uniform float mouseInfluence;
+            uniform float electricIntensity;
+            uniform float glowStrength;
+            uniform float arcFrequency;
+
+            uniform vec3 uColor1;
+            uniform vec3 uColor2;
+            uniform vec3 uColor3;
+            uniform vec3 uColor4;
+            uniform vec3 uColor5;
+            uniform vec3 uColor6;
+            uniform vec3 uColor7;
+            uniform vec3 uColor8;
+
+            varying vec3 vPosition;
+            varying vec3 vNormal;
+            varying float vIntensity;
+            varying float vDistFromMouse;
+            varying vec2 vUv;
+
+            ${noiseHelperFunctions}
+
+            void main() {
+                float t1 = sin(time * 0.8 + vUv.x * 5.0) * 0.5 + 0.5;
+                float t2 = cos(time * 0.6 - vUv.y * 6.0) * 0.5 + 0.5;
+                float t3 = sin(time * 1.5 + length(vPosition) * 2.0) * 0.5 + 0.5;
+
+                float noisePattern = fbm(vPosition * 3.5 + vec3(time * 0.8, -time * 0.5, time * 1.1));
+                float energyFlow = fbm(vPosition * 2.5 - vec3(time * 2.2, -time * 1.2, time * 1.8));
+
+                float slowPulse = sin(time * 2.5 + vPosition.x * 2.0) * 0.5 + 0.5;
+                float fastPulse = sin(time * 18.0 + vPosition.y * 5.0) * 0.5 + 0.5;
+
+                float arcSpeed1 = 10.0 + arcFrequency * 5.0;
+                float arcTravel1 = sin(vPosition.x * 15.0 + vPosition.y * 10.0 + time * arcSpeed1);
+                float arcTravel2 = cos(vPosition.y * 9.0 - vPosition.z * 12.0 - time * arcSpeed1 * 0.8);
+                float arcTravel3 = sin(vPosition.z * 11.0 + vPosition.x * 13.0 + time * arcSpeed1 * 1.2);
+
+                float arc1 = smoothstep(0.75, 0.9, arcTravel1) * smoothstep(0.9, 0.75, arcTravel1);
+                float arc2 = smoothstep(0.7, 0.85, arcTravel2) * smoothstep(0.85, 0.7, arcTravel2);
+                float arc3 = smoothstep(0.8, 0.95, arcTravel3) * smoothstep(0.95, 0.8, arcTravel3);
+                float arc = max(max(arc1, arc2), arc3);
+                arc = pow(arc, 1.5);
+                arc *= electricIntensity * (1.0 + arcFrequency);
+
+                float nodeEffect = 0.0;
+                vec3 normPos = normalize(vPosition);
+                float closenessToAxes = pow(abs(normPos.x * normPos.y * normPos.z), 0.1);
+                if (closenessToAxes < 0.8 && hash3D(floor(vPosition * 8.0)) > 0.7) {
+                    float nodePulse = sin(time * 6.0 + hash(length(vPosition)) * 15.0) * 0.5 + 0.5;
+                    nodeEffect = nodePulse * arcFrequency * 0.8 * smoothstep(0.8, 0.7, closenessToAxes);
+                }
+
+                float spark = 0.0;
+                float sparkThreshold = 0.98 - arcFrequency * 0.1;
+                if (hash(floor(time * (25.0 + arcFrequency * 20.0)) + vPosition.x * 18.0 + vPosition.y * 9.0) > sparkThreshold) {
+                    spark = (0.8 + hash(vPosition.z + time) * 0.2) * electricIntensity;
+                    spark = pow(spark, 2.0);
+                }
+
+                vec3 baseColor = mix(uColor1, uColor2, noisePattern * 0.6 + 0.4);
+                baseColor = mix(baseColor, uColor3, t1 * 0.6);
+                baseColor = mix(baseColor, uColor4, energyFlow * 0.4 * electricIntensity * slowPulse);
+                baseColor = mix(baseColor, uColor8, sin(vPosition.z * 5.0 - time * 1.5) * 0.1 * t2);
+
+                float arcWidth = 0.6 + sin(time * 4.0 + vPosition.x * 6.0) * 0.4;
+                vec3 arcColor = mix(uColor4, uColor5, arcWidth * t2);
+                arcColor = mix(arcColor, uColor6, arc * t3 * 0.8);
+                vec3 finalColor = mix(baseColor, arcColor, arc * arcWidth);
+
+                vec3 nodeColor = mix(uColor6, uColor7, fastPulse);
+                finalColor = mix(finalColor, nodeColor, nodeEffect);
+                finalColor = mix(finalColor, uColor7, nodeEffect * fastPulse * 0.6);
+
+                vec3 sparkColor = mix(uColor6, uColor7, hash(vPosition.y + time) * 0.8 + 0.2);
+                finalColor = mix(finalColor, sparkColor, spark);
+
+                float highlight = smoothstep(0.6, 1.5, vIntensity);
+                finalColor = mix(finalColor, uColor4, highlight * 0.4 * (1.0 - arc));
+                finalColor = mix(finalColor, uColor5, highlight * 0.2 * arc);
+
+                float mouseEffect = smoothstep(0.8, 0.1, vDistFromMouse) * mouseInfluence;
+                if (mouseEffect > 0.1) {
+                    float dischargeNoise = hash(vPosition.x * 10.0 + vPosition.y * 10.0 + floor(time * (30.0 + mouseInfluence * 20.0)));
+                    float dischargeThreshold = 0.6 - mouseInfluence * 0.3;
+                    if (dischargeNoise > dischargeThreshold) {
+                        float dischargeStrength = pow((dischargeNoise - dischargeThreshold) / (1.0 - dischargeThreshold), 2.0);
+                        vec3 dischargeColor = mix(uColor5, uColor7, dischargeStrength);
+                        finalColor = mix(finalColor, dischargeColor, dischargeStrength * mouseEffect * 1.5);
+                    }
+                    finalColor = mix(finalColor, uColor8, mouseEffect * 0.3 * t3);
+                }
+
+                float edgeFactor = pow(1.0 - abs(dot(normalize(vNormal), vec3(0.0, 0.0, 1.0))), 2.5);
+                vec3 edgeColor = mix(uColor3, uColor5, t2 * slowPulse);
+                edgeColor = mix(edgeColor, uColor6, edgeFactor * 0.4);
+                finalColor += edgeColor * edgeFactor * electricIntensity * 0.8;
+
+                float flicker = 0.9 + 0.1 * hash(vPosition.x * 20.0 + floor(time * (35.0 + arcFrequency * 15.0)));
+                flicker *= 0.96 + 0.04 * sin(time * 80.0 + vPosition.y * 40.0);
+                finalColor *= flicker;
+
+                float glow = pow(vIntensity * (mouseEffect * 0.6 + 0.4), 2.0) * glowStrength;
+                glow = clamp(glow * 1.0, 0.0, 1.0);
+                finalColor += mix(uColor4, uColor5, t3) * glow * 0.4;
+                finalColor += uColor6 * glow * 0.25 * fastPulse;
+
+                finalColor *= (0.7 + electricIntensity * 0.5);
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+const particleVertexShader = `
+            uniform float time;
+            uniform float arcFrequency;
+            uniform float electricIntensity;
+            uniform vec3 uColor3;
+            uniform vec3 uColor4;
+            uniform vec3 uColor5;
+            uniform vec3 uColor6;
+            attribute float size;
+            attribute float offset;
+            attribute float speed;
+            attribute float particleType;
+            varying vec3 vColor;
+            varying float vAlpha;
+            varying float vParticleType;
+            ${noiseHelperFunctions}
+            void main() {
+                vec3 pos = position;
+                vParticleType = particleType;
+                float t = time * speed + offset;
+                float visibility = 1.0;
+                float particleSize = size;
+                if (particleType < 0.5) {
+                    pos += normalize(position) * sin(t * 0.5) * 0.03;
+                    if (hash(offset + floor(time * (15.0 + arcFrequency * 10.0))) > 0.9) {
+                        pos += normalize(vec3(hash(offset*2.0)-0.5, hash(offset*3.0)-0.5, hash(offset*4.0)-0.5)) * 0.05 * electricIntensity;
+                    }
+                    vColor = uColor3;
+                    visibility = step(0.4, hash(offset * 10.0 + floor(time * 30.0)));
+                    particleSize *= (0.8 + hash(offset + time * 20.0) * 0.4);
+                    vAlpha = (0.4 + 0.6 * hash(offset + time * 40.0));
+                } else if (particleType < 1.5) {
+                    vec3 noiseOffset = vec3(
+                        noise(vec3(offset * 5.0, t * 3.0, offset * 3.0)),
+                        noise(vec3(offset * 5.0, t * 3.0 + 10.0, offset * 3.0)),
+                        noise(vec3(offset * 5.0, t * 3.0 + 20.0, offset * 3.0))
+                    ) * 0.1;
+                    pos += noiseOffset * electricIntensity;
+                    pos += normalize(position) * sin(t * 1.5) * 0.05;
+                    vColor = uColor4;
+                    visibility = step(0.3, hash(offset * 12.0 + floor(time * 50.0)));
+                    particleSize *= (0.6 + hash(offset + time * 30.0) * 0.4);
+                    vAlpha = (0.5 + 0.5 * hash(offset + time * 60.0));
+                } else if (particleType < 2.5) {
+                    pos += normalize(position) * sin(t * 0.2) * 0.01;
+                    vColor = uColor5;
+                    visibility = step(0.2, hash(offset * 8.0 + floor(time * 15.0)));
+                    float pulse = sin(t * 5.0) * 0.5 + 0.5;
+                    particleSize *= (1.0 + pulse * 0.8) * 1.3;
+                    vAlpha = (0.3 + 0.7 * pulse);
+                } else {
+                    if (hash(offset * 3.0 + floor(time * (8.0 + arcFrequency * 12.0))) > 0.95) {
+                        pos += normalize(vec3(hash(offset + t)-0.5, hash(offset*2.0 + t)-0.5, hash(offset*3.0 + t)-0.5)) * 0.15 * electricIntensity;
+                    }
+                    vColor = uColor6;
+                    visibility = step(0.5, hash(offset * 15.0 + floor(time * 25.0)));
+                    particleSize *= (0.7 + hash(offset + time * 10.0)) * 1.1;
+                    vAlpha = (0.6 + 0.4 * hash(offset + time * 35.0));
+                }
+                vAlpha *= visibility * electricIntensity * (0.6 + arcFrequency * 0.4);
+                vAlpha = clamp(vAlpha, 0.0, 1.0);
+                particleSize *= electricIntensity;
+                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                gl_Position = projectionMatrix * mvPosition;
+                gl_PointSize = particleSize * (400.0 / -mvPosition.z);
+            }
+        `;
+
+const particleFragmentShader = `
+            varying vec3 vColor;
+            varying float vAlpha;
+            varying float vParticleType;
+            void main() {
+                vec2 center = gl_PointCoord - vec2(0.5);
+                float dist = length(center);
+                float strength = 0.0;
+                if (vParticleType < 0.5) {
+                    strength = 1.0 - smoothstep(0.3, 0.5, dist);
+                } else if (vParticleType < 1.5) {
+                    strength = 1.0 - smoothstep(0.2, 0.45, dist);
+                } else if (vParticleType < 2.5) {
+                    strength = pow(1.0 - smoothstep(0.1, 0.5, dist), 1.5);
+                } else {
+                    strength = pow(1.0 - smoothstep(0.0, 0.5, dist), 2.0);
+                    strength += smoothstep(0.1, 0.0, dist) * 1.5;
+                }
+                float finalAlpha = strength * vAlpha;
+                if (finalAlpha < 0.01) discard;
+                gl_FragColor = vec4(vColor * finalAlpha, finalAlpha);
+            }
+        `;
+
+const createChromaticAberrationShader = () => ({
+    uniforms: {
+        tDiffuse: { value: null },
+        amount: { value: settings.chromaticAberrationAmount },
+        time: { value: 0 }
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float amount;
+        uniform float time;
+        varying vec2 vUv;
+        void main() {
+            float dynamicAmount = amount * (1.0 + sin(time * 5.0 + vUv.y * 10.0) * 0.1);
+            vec2 centerOffset = vUv - 0.5;
+            vec2 direction = normalize(centerOffset + 0.0001);
+            float dist = length(centerOffset);
+            vec2 offset = direction * dynamicAmount * (1.0 + dist * 0.5);
+            float r = texture2D(tDiffuse, vUv + offset).r;
+            float g = texture2D(tDiffuse, vUv).g;
+            float b = texture2D(tDiffuse, vUv - offset).b;
+            gl_FragColor = vec4(r, g, b, texture2D(tDiffuse, vUv).a);
+        }
+    `
+});
+
+function createElectricMaterial() {
+    return new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            mouse: { value: new THREE.Vector2() },
+            mouseInfluence: { value: 0.0 },
+            electricIntensity: { value: settings.electricIntensity },
+            arcFrequency: { value: settings.arcFrequency },
+            glowStrength: { value: settings.glowStrength },
+            uColor1: { value: currentTheme.uColor1.clone() },
+            uColor2: { value: currentTheme.uColor2.clone() },
+            uColor3: { value: currentTheme.uColor3.clone() },
+            uColor4: { value: currentTheme.uColor4.clone() },
+            uColor5: { value: currentTheme.uColor5.clone() },
+            uColor6: { value: currentTheme.uColor6.clone() },
+            uColor7: { value: currentTheme.uColor7.clone() },
+            uColor8: { value: currentTheme.uColor8.clone() }
+        },
+        vertexShader: electricVertexShader,
+        fragmentShader: electricFragmentShader,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        wireframe: false
+    });
+}
+
+function createParticleMaterial() {
+    return new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            arcFrequency: { value: settings.arcFrequency },
+            electricIntensity: { value: settings.electricIntensity },
+            uColor3: { value: currentTheme.uColor3.clone() },
+            uColor4: { value: currentTheme.uColor4.clone() },
+            uColor5: { value: currentTheme.uColor5.clone() },
+            uColor6: { value: currentTheme.uColor6.clone() }
+        },
+        vertexShader: particleVertexShader,
+        fragmentShader: particleFragmentShader,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+    });
+}
+
+function createElectricWireframeGeometry() {
+    const points = [];
+    const dt = 0.01;
+    const iterations = 10000;
+    
+    const sigma = 10.0;
+    const rho = 28.0;
+    const beta = 8.0 / 3.0;
+    
+    let x = 0.1;
+    let y = 0.0;
+    let z = 0.0;
+    
+    for (let i = 0; i < iterations; i++) {
+        const dx = sigma * (y - x);
+        const dy = x * (rho - z) - y;
+        const dz = x * y - beta * z;
+        
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+        
+        if (i % 3 === 0) {
+            points.push(new THREE.Vector3(x * 0.08, y * 0.08, z * 0.08));
+        }
+    }
+    
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    
+    const positions = geometry.attributes.position.array;
+    const wireframePositions = [];
+    
+    for (let i = 0; i < positions.length - 3; i += 3) {
+        wireframePositions.push(
+            positions[i], positions[i + 1], positions[i + 2],
+            positions[i + 3], positions[i + 4], positions[i + 5]
+        );
+    }
+    
+    const wireframeGeometry = new THREE.BufferGeometry();
+    wireframeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(wireframePositions, 3));
+    
+    const normals = new Float32Array(wireframePositions.length);
+    const tempNormal = new THREE.Vector3();
+    
+    for (let i = 0; i < wireframePositions.length; i += 3) {
+        tempNormal.set(wireframePositions[i], wireframePositions[i+1], wireframePositions[i+2]).normalize();
+        normals[i] = tempNormal.x;
+        normals[i+1] = tempNormal.y;
+        normals[i+2] = tempNormal.z;
+    }
+    wireframeGeometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+    
+    const uvs = new Float32Array(wireframePositions.length / 3 * 2);
+    for (let i = 0; i < wireframePositions.length / 3; i++) {
+        uvs[i*2] = i / (wireframePositions.length / 3);
+        uvs[i*2+1] = 0.5;
+    }
+    wireframeGeometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    
+    return wireframeGeometry;
+}
+
+function createLightningBolts() {
+    const boltCount = 25;
+    const boltsGroup = new THREE.Group();
+
+    const boltMaterial = new THREE.LineBasicMaterial({
+        color: currentTheme.boltColor,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    const branchMaterial = new THREE.LineBasicMaterial({
+        color: 0xffcc88,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    const subBranchMaterial = new THREE.LineBasicMaterial({
+        color: 0xffeeaa,
+        transparent: true,
+        opacity: 0.4,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+
+    for (let i = 0; i < boltCount; i++) {
+        const singleBoltGroup = new THREE.Group();
+        const mainPoints = [];
+        const segments = 15 + Math.floor(Math.random() * 10);
+        const shapeRadius = 2.5;
+
+        const startVec = new THREE.Vector3()
+            .randomDirection()
+            .multiplyScalar(shapeRadius);
+        mainPoints.push(startVec);
+
+        const length = 1.8 + Math.random() * 2.2;
+        const endVec = startVec.clone().multiplyScalar(1 + length / shapeRadius);
+
+        const mainDirection = new THREE.Vector3().subVectors(endVec, startVec).normalize();
+        let currentPos = startVec.clone();
+
+        for (let j = 1; j < segments; j++) {
+            const t = j / segments;
+            const targetPos = new THREE.Vector3().lerpVectors(startVec, endVec, t);
+
+            const randomDir = new THREE.Vector3().randomDirection();
+            const perpDir = new THREE.Vector3().crossVectors(mainDirection, randomDir).normalize();
+            const jaggedness = (Math.random() - 0.5) * 0.8 * (1.0 - t);
+
+            currentPos.lerp(targetPos, 0.5);
+            currentPos.addScaledVector(perpDir, jaggedness);
+            const intermediatePoint = currentPos.clone();
+            mainPoints.push(intermediatePoint);
+
+            const branchProbability = 0.55 + settings.arcFrequency * 0.35;
+            if (j > 1 && j < segments - 1 && Math.random() < branchProbability) {
+                const numBranches = 1 + Math.floor(Math.random() * 3);
+                for (let b = 0; b < numBranches; b++) {
+                    createBranch(intermediatePoint, mainDirection, branchMaterial, subBranchMaterial, singleBoltGroup, 1);
+                }
+            }
+        }
+        mainPoints.push(endVec);
+
+        const mainGeometry = new THREE.BufferGeometry().setFromPoints(mainPoints);
+        const mainBolt = new THREE.Line(mainGeometry, boltMaterial.clone());
+        mainBolt.userData = { type: 'main', lifetime: 0.25 + Math.random() * 0.3, age: 0, active: false };
+        mainBolt.visible = false;
+        singleBoltGroup.add(mainBolt);
+        boltsGroup.add(singleBoltGroup);
+    }
+    return boltsGroup;
+}
+
+function createBranch(startPoint, parentDirection, material, subMaterial, group, level) {
+    if (level > 2) return;
+
+    const branchPoints = [startPoint.clone()];
+    const branchSegments = 6 + Math.floor(Math.random() * (7 - level * 2));
+    const branchLength = (0.7 + Math.random() * 1.0) / level;
+
+    const randomDeviation = new THREE.Vector3().randomDirection().multiplyScalar(0.8);
+    const branchDirection = new THREE.Vector3().addVectors(parentDirection, randomDeviation).normalize();
+
+    let currentPos = startPoint.clone();
+    const endPoint = new THREE.Vector3().addVectors(startPoint, branchDirection.multiplyScalar(branchLength));
+
+    for (let k = 1; k < branchSegments; k++) {
+        const t = k / branchSegments;
+        const targetPos = new THREE.Vector3().lerpVectors(startPoint, endPoint, t);
+
+        const randomDir = new THREE.Vector3().randomDirection();
+        const perpDir = new THREE.Vector3().crossVectors(branchDirection, randomDir).normalize();
+        const jaggedness = (Math.random() - 0.5) * 0.5 / level * (1.0 - t);
+
+        currentPos.lerp(targetPos, 0.6);
+        currentPos.addScaledVector(perpDir, jaggedness);
+        const intermediatePoint = currentPos.clone();
+        branchPoints.push(intermediatePoint);
+
+        const subBranchProb = 0.4 / level;
+        if (level < 2 && k > 0 && k < branchSegments -1 && Math.random() < subBranchProb) {
+            createBranch(intermediatePoint, branchDirection, subMaterial, subMaterial, group, level + 1);
+        }
+    }
+    branchPoints.push(endPoint);
+
+    const branchGeometry = new THREE.BufferGeometry().setFromPoints(branchPoints);
+    const branchLine = new THREE.Line(branchGeometry, material.clone());
+    branchLine.userData = { type: `branch${level}`, lifetime: (0.15 + Math.random() * 0.2) / level, age: 0, active: false };
+    branchLine.visible = false;
+    group.add(branchLine);
+}
+
+function createChainLightning() {
+    const chainsGroup = new THREE.Group();
+    const chainMaterial = new THREE.LineBasicMaterial({
+        color: currentTheme.chainColor,
+        transparent: true,
+        opacity: 0.7,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+
+    let potentialNodes = [];
+    if (electricShape && electricShape.geometry && electricShape.geometry.attributes.position) {
+        const shapePositions = electricShape.geometry.attributes.position.array;
+        const numVertices = shapePositions.length / 3;
+        const nodeCount = Math.min(100, numVertices);
+
+        const indices = Array.from({length: numVertices}, (_, i) => i);
+        for(let i = 0; i < nodeCount && indices.length > 0; i++) {
+            const randomIndex = Math.floor(Math.random() * indices.length);
+            const nodeIndex = indices.splice(randomIndex, 1)[0];
+            potentialNodes.push(new THREE.Vector3(
+                shapePositions[nodeIndex * 3],
+                shapePositions[nodeIndex * 3 + 1],
+                shapePositions[nodeIndex * 3 + 2]
+            ));
+        }
+    } else {
+        const fallbackNodeCount = 50;
+        for(let i = 0; i < fallbackNodeCount; i++) {
+            potentialNodes.push(new THREE.Vector3().randomDirection().multiplyScalar(2.5));
+        }
+    }
+
+    const maxChains = 60;
+    let chainCount = 0;
+    const finalNodeCount = potentialNodes.length;
+
+    for (let i = 0; i < finalNodeCount && chainCount < maxChains; i++) {
+        for (let j = i + 1; j < finalNodeCount && chainCount < maxChains; j++) {
+            const startNode = potentialNodes[i];
+            const endNode = potentialNodes[j];
+            const distance = startNode.distanceTo(endNode);
+
+            if (distance > 0.5 && distance < 2.5 && Math.random() > 0.6) {
+                const chainPoints = [];
+                const segments = 6 + Math.floor(Math.random() * 4);
+                const chainDirection = new THREE.Vector3().subVectors(endNode, startNode).normalize();
+
+                chainPoints.push(startNode);
+                let currentPos = startNode.clone();
+
+                for (let k = 1; k < segments; k++) {
+                    const t = k / segments;
+                    const targetPos = new THREE.Vector3().lerpVectors(startNode, endNode, t);
+
+                    const randomDir = new THREE.Vector3().randomDirection();
+                    const perpDir = new THREE.Vector3().crossVectors(chainDirection, randomDir).normalize();
+                    const jaggedness = (Math.random() - 0.5) * 0.3 * Math.sin(t * Math.PI);
+
+                    currentPos.lerp(targetPos, 0.5);
+                    currentPos.addScaledVector(perpDir, jaggedness);
+                    chainPoints.push(currentPos.clone());
+                }
+                chainPoints.push(endNode);
+
+                const chainGeometry = new THREE.BufferGeometry().setFromPoints(chainPoints);
+                const chain = new THREE.Line(chainGeometry, chainMaterial.clone());
+                chain.userData = { type: 'chain', lifetime: 0.1 + Math.random() * 0.15, age: 0, active: false };
+                chain.visible = false;
+                chainsGroup.add(chain);
+                chainCount++;
+            }
+        }
+    }
+    return chainsGroup;
+}
+
+function createElectricParticles() {
+    const particleCount = 800;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+    const offsets = new Float32Array(particleCount);
+    const speeds = new Float32Array(particleCount);
+    const particleTypes = new Float32Array(particleCount);
+
+    const radius = 2.5;
+
+    for (let i = 0; i < particleCount; i++) {
+        const dist = radius + (Math.random() - 0.5) * 0.8;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+
+        positions[i * 3] = dist * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = dist * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = dist * Math.cos(phi);
+
+        sizes[i] = 0.02 + Math.random() * 0.06;
+        offsets[i] = Math.random() * 100;
+        speeds[i] = 0.4 + Math.random() * 1.2;
+        particleTypes[i] = Math.floor(Math.random() * 4);
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    geometry.setAttribute('offset', new THREE.BufferAttribute(offsets, 1));
+    geometry.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
+    geometry.setAttribute('particleType', new THREE.BufferAttribute(particleTypes, 1));
+
+    return new THREE.Points(geometry, createParticleMaterial());
+}
+
+function updateSliderValues() {
+    document.getElementById('electric-value').textContent = `${Math.round(settings.electricIntensity * 100)}%`;
+    document.getElementById('arc-value').textContent = `${Math.round(settings.arcFrequency * 100)}%`;
+    document.getElementById('glow-value').textContent = `${Math.round(settings.glowStrength * 100)}%`;
+}
+
+function updateMaterials(deltaTime) {
+    const time = clock.elapsedTime;
+
+    if (electricShape) {
+        electricShape.material.uniforms.time.value = time;
+        electricShape.material.uniforms.mouse.value.copy(mouse);
+        electricShape.material.uniforms.mouseInfluence.value = mouseInfluence;
+        electricShape.material.uniforms.electricIntensity.value = settings.electricIntensity;
+        electricShape.material.uniforms.arcFrequency.value = settings.arcFrequency;
+        electricShape.material.uniforms.glowStrength.value = settings.glowStrength;
+    }
+
+    if (electricParticles) {
+        electricParticles.material.uniforms.time.value = time;
+        electricParticles.material.uniforms.arcFrequency.value = settings.arcFrequency;
+        electricParticles.material.uniforms.electricIntensity.value = settings.electricIntensity;
+    }
+
+    if (chromaticAberrationPass) {
+        chromaticAberrationPass.uniforms.time.value = time;
+        const baseAmount = chromaticAberrationPass.userData?.originalAmount ?? settings.chromaticAberrationAmount;
+        chromaticAberrationPass.uniforms.amount.value = baseAmount * (1.0 + Math.sin(time * 4.0) * 0.05);
+    }
+    if (bloomPass) {
+        const baseStrength = bloomPass.userData?.originalStrength ?? settings.bloom.strength;
+        bloomPass.strength = Math.min(baseStrength, 0.4 + settings.glowStrength * 0.4);
+    }
+}
+
+function updateLightning(deltaTime) {
+    const decayRate = deltaTime * 5;
+
+    if (settings.enableLightning && lightningBolts) {
+        lightningBolts.children.forEach(singleBoltGroup => {
+            singleBoltGroup.children.forEach(line => {
+                if (line.userData.active) {
+                    line.userData.age += deltaTime;
+                    const lifeRatio = line.userData.age / line.userData.lifetime;
+                    const initialOpacity = line.userData.initialOpacity !== undefined ? line.userData.initialOpacity : line.material.opacity;
+                    line.material.opacity = Math.max(0, (1.0 - lifeRatio) * initialOpacity);
+
+                    if (line.userData.age >= line.userData.lifetime) {
+                        line.userData.active = false;
+                        line.visible = false;
+                        if (line.userData.originalLinewidth !== undefined) {
+                            delete line.userData.originalLinewidth;
+                        }
+                        if (line.userData.originalColor) {
+                            line.material.color.copy(line.userData.originalColor);
+                            delete line.userData.originalColor;
+                        }
+                        delete line.userData.initialOpacity;
+                    }
+                }
+            });
+        });
+        if (Math.random() < (0.01 + settings.arcFrequency * 0.05) * settings.electricIntensity) {
+            triggerRandomLightning(lightningBolts.children, 1, (bolt) => activateLightningBolt(bolt, { color: currentTheme.boltColor }));
+        }
+    }
+
+    if (settings.enableChainLightning && chainLightning) {
+        chainLightning.children.forEach(chain => {
+            if (chain.userData.active) {
+                chain.userData.age += deltaTime;
+                const lifeRatio = chain.userData.age / chain.userData.lifetime;
+                const initialOpacity = chain.userData.initialOpacity !== undefined ? chain.userData.initialOpacity : chain.material.opacity;
+                chain.material.opacity = Math.max(0, (1.0 - lifeRatio) * initialOpacity);
+                chain.material.opacity *= (0.8 + Math.random() * 0.2);
+
+                if (chain.userData.age >= chain.userData.lifetime) {
+                    chain.userData.active = false;
+                    chain.visible = false;
+                    if (chain.userData.originalLinewidth !== undefined) {
+                        delete chain.userData.originalLinewidth;
+                    }
+                    if (chain.userData.originalColor) {
+                        chain.material.color.copy(chain.userData.originalColor);
+                        delete chain.userData.originalColor;
+                    }
+                    delete chain.userData.initialOpacity;
+                }
+            }
+        });
+        if (Math.random() < (0.005 + settings.arcFrequency * 0.04) * settings.electricIntensity) {
+            triggerRandomLightning(chainLightning.children, 1, (chain) => activateChainLightning(chain, { color: currentTheme.chainColor }));
+        }
+    }
+}
+
+function triggerRandomLightning(elements, count = 1, activationFn) {
+    const inactive = elements.filter(el => {
+        if (el.isGroup) return el.children[0] && !el.children[0].userData.active;
+        return !el.userData.active;
+    });
+
+    for (let i = 0; i < count && inactive.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * inactive.length);
+        const elementToActivate = inactive.splice(randomIndex, 1)[0];
+        activationFn(elementToActivate);
+    }
+}
+
+function activateLightningBolt(boltGroup, options = {}) {
+    if (!boltGroup || !boltGroup.children || boltGroup.children.length === 0) return;
+
+    const mainBolt = boltGroup.children[0];
+    if (!mainBolt || mainBolt.userData.active) return;
+
+    const lifetimeScale = options.lifetimeScale || 1.0;
+    const opacityScale = options.opacityScale || 1.0;
+    const color = options.color || currentTheme.boltColor;
+
+    mainBolt.userData.age = 0;
+    mainBolt.userData.active = true;
+    mainBolt.visible = true;
+    mainBolt.userData.initialOpacity = (0.7 + Math.random() * 0.3) * opacityScale;
+    mainBolt.material.opacity = mainBolt.userData.initialOpacity;
+    mainBolt.userData.lifetime = (0.25 + Math.random() * 0.3) * lifetimeScale;
+    
+    if (!mainBolt.userData.originalColor) mainBolt.userData.originalColor = mainBolt.material.color.clone();
+    mainBolt.material.color.setHex(color);
+
+    for (let i = 1; i < boltGroup.children.length; i++) {
+        const branch = boltGroup.children[i];
+        const delay = Math.random() * (options.maxDelay || 50);
+
+        setTimeout(() => {
+            if (branch && !branch.userData.active) {
+                branch.userData.age = 0;
+                branch.userData.active = true;
+                branch.visible = true;
+                branch.userData.initialOpacity = (0.5 + Math.random() * 0.4) * opacityScale;
+                branch.material.opacity = branch.userData.initialOpacity;
+                const branchLevel = parseInt(branch.userData.type.replace('branch', '')) || 1;
+                branch.userData.lifetime = (0.15 + Math.random() * 0.2) / branchLevel * lifetimeScale;
+                
+                if (options.branchColorVariation && Math.random() > 0.6) {
+                     if (!branch.userData.originalColor) branch.userData.originalColor = branch.material.color.clone();
+                     branch.material.color.setHex(color).offsetHSL(0, 0, 0.1); 
+                } else {
+                     if (!branch.userData.originalColor) branch.userData.originalColor = branch.material.color.clone();
+                     branch.material.color.setHex(color);
+                }
+            }
+        }, delay);
+    }
+}
+
+function activateChainLightning(chain, options = {}) {
+    if (!chain || chain.userData.active) return;
+
+    const lifetimeScale = options.lifetimeScale || 1.0;
+    const opacityScale = options.opacityScale || 1.0;
+    const color = options.color || currentTheme.chainColor;
+
+    chain.userData.age = 0;
+    chain.userData.active = true;
+    chain.visible = true;
+    chain.userData.initialOpacity = (0.6 + Math.random() * 0.3) * opacityScale;
+    chain.material.opacity = chain.userData.initialOpacity;
+    chain.userData.lifetime = (0.1 + Math.random() * 0.15) * lifetimeScale;
+    
+    if (!chain.userData.originalColor) chain.userData.originalColor = chain.material.color.clone();
+    chain.material.color.setHex(color);
+}
+
+function handleSliderChange(event) {
+    const id = event.target.id;
+    const value = parseFloat(event.target.value) / 100;
+
+    switch (id) {
+        case 'electricIntensity': settings.electricIntensity = value; break;
+        case 'arcFrequency': settings.arcFrequency = value; break;
+        case 'glowStrength': settings.glowStrength = value; break;
+    }
+    updateSliderValues();
+}
+
+function onMouseMove(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    mouseSpeed.x = mouse.x - lastMousePosition.x;
+    mouseSpeed.y = mouse.y - lastMousePosition.y;
+    lastMousePosition.copy(mouse);
+
+    targetRotation.x = mouse.y * 0.6;
+    targetRotation.y = mouse.x * 0.6;
+}
+
+function onTouchMove(event) {
+    if (event.touches.length === 1) {
+        event.preventDefault();
+        onMouseMove(event.touches[0]);
+    }
+}
+
+function onInteractionStart(event) {
+    if (event.type === 'touchstart') {
+        event.preventDefault();
+        onMouseMove(event.touches[0]);
+    }
+
+    mouseInfluence = Math.min(mouseInfluence + 1.5, 2.0);
+
+    const flashElement = document.querySelector('.click-flash');
+    if(flashElement) {
+        flashElement.style.opacity = 1;
+        setTimeout(() => {
+            flashElement.style.opacity = 0;
+        }, 180);
+    }
+
+    const currentBloomStrength = bloomPass.strength;
+    const currentAberration = chromaticAberrationPass.uniforms.amount.value;
+    bloomPass.strength = Math.min(settings.bloom.strength * 1.4, 1.5);
+    chromaticAberrationPass.uniforms.amount.value = settings.chromaticAberrationAmount * 4.0;
+
+    if (bloomPass.userData.originalStrength === undefined) {
+        bloomPass.userData.originalStrength = currentBloomStrength;
+    }
+    if (chromaticAberrationPass.userData.originalAmount === undefined) {
+        chromaticAberrationPass.userData.originalAmount = currentAberration;
+    }
+
+    clearTimeout(bloomPass.userData.restoreTimeout);
+    clearTimeout(chromaticAberrationPass.userData.restoreTimeout);
+
+    const restoreDuration = 350;
+    bloomPass.userData.restoreTimeout = setTimeout(() => {
+        if (bloomPass.userData.originalStrength !== undefined) {
+            bloomPass.strength = bloomPass.userData.originalStrength;
+            delete bloomPass.userData.originalStrength;
+        } else {
+            bloomPass.strength = Math.min(settings.bloom.strength, 0.4 + settings.glowStrength * 0.4);
+        }
+    }, restoreDuration);
+
+    chromaticAberrationPass.userData.restoreTimeout = setTimeout(() => {
+        if (chromaticAberrationPass.userData.originalAmount !== undefined) {
+            chromaticAberrationPass.uniforms.amount.value = chromaticAberrationPass.userData.originalAmount;
+            delete chromaticAberrationPass.userData.originalAmount;
+        } else {
+            chromaticAberrationPass.uniforms.amount.value = settings.chromaticAberrationAmount;
+        }
+    }, restoreDuration);
+
+    const allBolts = [...lightningBolts.children];
+    const allChains = [...chainLightning.children];
+
+    const wave1BoltCount = Math.min(allBolts.length, 25 + Math.floor(Math.random() * 15));
+    const wave1ChainCount = Math.min(allChains.length, 35 + Math.floor(Math.random() * 20));
+
+    triggerRandomLightning(allBolts, wave1BoltCount, (bolt) => activateLightningBolt(bolt, {
+        lifetimeScale: 0.9 + Math.random() * 0.5,
+        opacityScale: 1.6,
+        maxDelay: 25,
+        branchColorVariation: true,
+        color: currentTheme.boltColor
+    }));
+    triggerRandomLightning(allChains, wave1ChainCount, (chain) => activateChainLightning(chain, {
+        lifetimeScale: 0.8 + Math.random() * 0.4,
+        opacityScale: 1.7,
+        color: Math.random() > 0.4 ? 0xffffff : currentTheme.chainColor
+    }));
+
+    setTimeout(() => {
+        const wave2BoltCount = Math.min(allBolts.length, 10 + Math.floor(Math.random() * 10));
+        triggerRandomLightning(allBolts, wave2BoltCount, (bolt) => activateLightningBolt(bolt, {
+            lifetimeScale: 0.6 + Math.random() * 0.3,
+            opacityScale: 1.2,
+            color: currentTheme.boltColor,
+            maxDelay: 70
+        }));
+    }, 120);
+
+    setTimeout(() => {
+        const wave3ChainCount = Math.min(allChains.length, 20 + Math.floor(Math.random() * 15));
+        triggerRandomLightning(allChains, wave3ChainCount, (chain) => activateChainLightning(chain, {
+            lifetimeScale: 0.5 + Math.random() * 0.2,
+            opacityScale: 1.0,
+            color: currentTheme.chainColor
+        }));
+    }, 220);
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    const deltaTime = clock.getDelta();
+
+    mouseInfluence *= 0.96;
+    const speed = mouseSpeed.length();
+    mouseInfluence += speed * 3.0;
+    mouseInfluence = Math.min(mouseInfluence, 1.2);
+
+    currentRotation.x += (targetRotation.x - currentRotation.x) * 0.06;
+    currentRotation.y += (targetRotation.y - currentRotation.y) * 0.06;
+    
+    if (electricShape) {
+        electricShape.rotation.x = currentRotation.x;
+        electricShape.rotation.y = currentRotation.y;
+        const floatOffset = Math.sin(clock.elapsedTime * 0.6) * 0.08;
+        electricShape.position.y = floatOffset;
+    }
+
+    updateMaterials(deltaTime);
+    updateLightning(deltaTime);
+
+    mouseSpeed.multiplyScalar(0.94);
+
+    composer.render(deltaTime);
+}
+
+init();
+</script>
