@@ -1,0 +1,100 @@
+
+# Mohini Tool Setup Guide (Kali Linux)
+
+A comprehensive guide to downloading, setting up, and running the Mohini audio capture tool with Cloudflare tunneling on Kali Linux.
+
+---
+
+## 📋 Prerequisites
+Before starting, make sure your system package list is updated. Run:
+```bash
+sudo apt update
+
+```
+
+---
+
+## 🚀 Step-by-step Installation & Setup
+
+### Step 1: Clone the Repository
+
+First, clone the Mohini repository from GitHub and navigate into the directory:
+
+```bash
+git clone [https://github.com/techchipnet/Mohini.git](https://github.com/techchipnet/Mohini.git)
+cd Mohini
+
+```
+
+*(Note: Replace the URL above if you are using a different fork or repository).*
+
+### Step 2: Grant Execution Permissions
+
+Give execution permissions to the main shell script:
+
+```bash
+chmod +x mohini.sh
+
+```
+
+### Step 3: Install Cloudflared (For Port Forwarding)
+
+Since `cloudflared` is not available in the default Kali Linux repositories, download and install the official Debian package directly:
+
+```bash
+# 1. Download the latest .deb package
+wget [https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb](https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb)
+
+# 2. Install the package using dpkg
+sudo dpkg -i cloudflared-linux-amd64.deb
+
+```
+
+---
+
+## 🏃 How to Run the Tool
+
+### Method 1: Automatic Setup (Using Tool's Internal Menu)
+
+1. Start the tool with root privileges:
+```bash
+sudo ./mohini.sh
+
+```
+
+
+2. Choose your preferred template/phishing page from the menu.
+3. When prompted for Port Forwarding, select **Cloudflared** (Option 2).
+4. The tool will automatically generate a public `trycloudflare.com` URL.
+
+### Method 2: Manual Tunneling (Highly Recommended if Auto-tunnel Fails)
+
+If the tool's built-in Cloudflared option fails to launch, you can run the tunnel manually in a new terminal window:
+
+1. Launch Mohini on your local machine:
+```bash
+sudo ./mohini.sh
+
+```
+
+
+*(Note down the local port number displayed in the terminal, usually `8080` or `3333`)*.
+2. Open a **new terminal tab/window** and start the Cloudflare tunnel manually:
+```bash
+cloudflared tunnel --url [http://127.0.0.1:8080](http://127.0.0.1:8080)
+
+```
+
+
+*(Replace `8080` with the actual port Mohini is running on).*
+3. Copy the secure `https://*.trycloudflare.com` link generated in the terminal.
+
+---
+
+## ⚠️ Disclaimer
+
+> **Educational Purposes Only:** This guide and tool are intended solely for authorized penetration testing, cybersecurity research, and educational purposes in a controlled lab environment. Unauthorized access, spying, or capturing audio without explicit consent is illegal under cyber laws.
+
+```
+
+---
